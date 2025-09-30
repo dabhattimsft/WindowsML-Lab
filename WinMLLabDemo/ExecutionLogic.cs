@@ -33,14 +33,29 @@ namespace WinMLLabDemo
 
         public static string CompileModelForExecutionProvider(OrtEpDevice executionProvider)
         {
-            // TODO: Compile Model
-            return string.Empty;
+            string baseModelPath = IOPath.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{ModelName}{ModelExtension}");
+            string compiledModelPath = ModelHelpers.GetCompiledModelPath(executionProvider);
+
+            try
+            {
+                var sessionOptions = GetSessionOptions(executionProvider);
+
+                // TODO: Create compilation options, set the input and output, and compile
+            }
+            catch
+            {
+                throw new Exception($"Failed to create session with execution provider: {executionProvider.EpName}");
+            }
+
+            return compiledModelPath;
         }
 
         public static InferenceSession LoadModel(string compiledModelPath, OrtEpDevice executionProvider)
         {
             var sessionOptions = GetSessionOptions(executionProvider);
-            return new InferenceSession(compiledModelPath, sessionOptions);
+
+            // TODO: Return an inference session
+            throw new NotImplementedException();
         }
 
         public static async Task<string> RunModelAsync(InferenceSession session, string imagePath, string compiledModelPath, OrtEpDevice executionProvider)
@@ -48,11 +63,8 @@ namespace WinMLLabDemo
             // Prepare inputs
             var inputs = await ModelHelpers.BindInputs(imagePath, session);
 
-            // Run inference
-            using var results = session.Run(inputs);
-
-            // Format the results
-            return ModelHelpers.FormatResults(results, session);
+            // TODO: Run the inference, format and return the results
+            throw new NotImplementedException();
         }
 
         private static SessionOptions GetSessionOptions(OrtEpDevice executionProvider)
