@@ -18,6 +18,14 @@ namespace WinMLLabDemo
         static ExecutionLogic()
         {
             // TODO: Initialize the OrtEnv instance
+            EnvironmentCreationOptions envOptions = new()
+            {
+                logId = "WinMLLabDemo",
+                logLevel = OrtLoggingLevel.ORT_LOGGING_LEVEL_WARNING
+            };
+
+            // Pass the options by reference to CreateInstanceWithOptions
+            _ortEnv = OrtEnv.CreateInstanceWithOptions(ref envOptions);
         }
 
         public static IReadOnlyList<OrtEpDevice> LoadExecutionProviders()
