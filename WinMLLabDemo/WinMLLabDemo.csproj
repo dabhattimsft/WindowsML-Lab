@@ -39,12 +39,4 @@
     </Content>
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="C:\Users\aleader\.nuget\packages\microsoft.windowsappsdk.runtime\1.8.250702007-experimental4\buildTransitive\..\include\WindowsAppSDK-VersionInfo.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="C:\Users\aleader\.nuget\packages\microsoft.windowsappsdk.foundation\1.8.250701000-experimental\buildTransitive\..\include\MddBootstrapAutoInitializer.cs" />
-  </ItemGroup>
-
 </Project>

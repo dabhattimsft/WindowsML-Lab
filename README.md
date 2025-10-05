@@ -20,11 +20,11 @@ The app should look like this when it launches.
 
 <img width="400" alt="image" src="https://github.com/user-attachments/assets/153119fc-1faf-4a61-91b1-7655b34a4963" />
 
-Notice that there are some execution providers that already appear. By default, the CPU and DirectML execution providers are present on all devices. However, the device you're using should have an NPU. We're going to use WinML to dynamically download the execution provider that works with your NPU, so that you can run the model on your NPU!
+Notice that there are some execution providers that already appear. By default, the CPU and DirectML execution providers are present on all devices. You might have the device with NPU and We're going to use WinML to dynamically download the execution provider that works with your NPU, so that you can run the model on your NPU!
 
 ## Step 3: Inspect the NuGet packages
 
-Back in Visual Studio, open the *Solution Explorer* and inspect the dependencies of the project. Notice that the Windows App SDK NuGet package is installed. If you were starting a new project, you would install the Windows App SDK NuGet package yourself. We have it pre-installed since we leverage some of the types in the sample project.
+Back in Visual Studio, open the *Solution Explorer* and inspect the dependencies of the project. You need to install the Windows App SDK NuGet package if it is not present.
 
 <img width="250" height="144" alt="image" src="https://github.com/user-attachments/assets/590e3c54-d7b6-406e-b76d-b9a4860265d4" />
 
@@ -36,7 +36,7 @@ Further down in the *Solution Explorer*, find and open the **ExecutionLogic.cs**
 
 ## Step 5: Implement getting new EPs
 
-First, we have to use WinML to see if there are any new EPs, and download them if there are. Update `InitializeWinMLEPsAsync` to call `await catalog.EnsureAndRegisterAllAsync()`.
+First, we have to use WinML to see if there are any new EPs, and download them if there are. Update `InitializeWinMLEPsAsync` to call `await catalog.EnsureAndRegisterCertifiedAsync()`.
 
 ```csharp
 public static async Task InitializeWinMLEPsAsync()
@@ -46,7 +46,7 @@ public static async Task InitializeWinMLEPsAsync()
 
     // Check if there's any new EPs to download, and if so, download them,
     // and then register all the EPs with the WinML copy of ONNX Runtime
-    await catalog.EnsureAndRegisterAllAsync();
+    await catalog.EnsureAndRegisterCertifiedAsync();
 }
 ```
 
@@ -56,7 +56,7 @@ With that method implemented, save your changes (`Ctrl+S`) and then press the **
 
 > If you get a hot reload error about "Value cannot be null. (Parameter 'key')", click "Edit" then try adding the first line by itself and hot reloading, and then adding the second line (or stop debugging and re-deploy).
 
-Then, switch back to the app and click the **Initialize WinML EPs** button, which will call the API we just added! Notice that a new QNN EP for NPU appeared!
+Then, switch back to the app and click the **Initialize WinML EPs** button, which will call the API we just added! If you have NPU on your device and if there's a compatible EP available, you should see that in the list.
 
 <img width="359" height="116" alt="image" src="https://github.com/user-attachments/assets/7c6d7342-d261-4ed0-8683-873e2cf5445c" />
 
@@ -64,7 +64,7 @@ We still need to implement logic to compile, load, and inference the model, whic
 
 ## Step 6: Implement compiling the model
 
-For these hardware-specific EPs, models need to be compiled against the EP before you can use the model.
+For these hardware-specific EPs, models need to be compiled against the EP before you can use the model. If you don't have NPU on your device or not see EP, we will continue with CPU/DML EP. These EPs don't require compiling the model.
 
 Back in our **ExecutionLogic.cs** file, locate the `CompileModelForExecutionProvider` method. Feel free to explore the `GetSessionOptions` method too, which is where we configure the ONNX session for the selected EP.
 
@@ -92,7 +92,7 @@ compileOptions.CompileModel();
 
 Save your changes (`Ctrl+S`) and then press the **Hot Reload** button (or `Alt+F10`).
 
-Then, switch back to the app, select the **QNNExecutionProvider** EP, and click the **Compile Model** button. This will take ~17 seconds, but in the console output you should eventually see that it outputs a compiled model path!
+Then, switch back to the app, select the **QNNExecutionProvider**/**OpenVINOExecutionProvider**/**NvTensorRtRtxExecutionProvider**/**VitisAIExecutionProvider** EP, and click the **Compile Model** button. This will take ~15 seconds, but in the console output you should eventually see that it outputs a compiled model path!
 
 <img width="400" alt="image" src="https://github.com/user-attachments/assets/71c02862-09d6-4891-a55e-0476a1603a15" />
 
