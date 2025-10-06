@@ -66,7 +66,24 @@ We still need to implement logic to compile, load, and inference the model, whic
 
 For these hardware-specific EPs, models need to be compiled against the EP before you can use the model. If you don't have NPU on your device or not see EP, we will continue with CPU/DML EP. These EPs don't require compiling the model.
 
-Back in our **ExecutionLogic.cs** file, locate the `CompileModelForExecutionProvider` method. Feel free to explore the `GetSessionOptions` method too, which is where we configure the ONNX session for the selected EP.
+First we will configure session options for EP we have selected.
+Back in our **ExecutionLogic.cs** file, locate `GetSessionOptions` method. Add following options for QNN and OpenVINO. There are other options available as well.
+
+```csharp
+case "OpenVINOExecutionProvider":
+    // Configure threading for OpenVINO EP
+    epOptions["num_of_threads"] = "4";
+    sessionOptions.AppendExecutionProvider(_ortEnv, [executionProvider], epOptions);
+    break;
+
+case "QNNExecutionProvider":
+    // Configure performance mode for QNN EP
+    epOptions["htp_performance_mode"] = "high_performance";
+    sessionOptions.AppendExecutionProvider(_ortEnv, [executionProvider], epOptions);
+    break;
+```
+
+Back in our **ExecutionLogic.cs** file, locate the `CompileModelForExecutionProvider` method. 
 
 Within the `// TODO` in `CompileModelForExecutionProvider`, you'll first need to create a new `compileOptions` via `new OrtModelCompilationOptions(sessionOptions)`, passing in the sessionOptions that are specific to the EP we've selected.
 

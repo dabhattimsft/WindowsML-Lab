@@ -80,7 +80,32 @@ namespace WinMLLabDemo
             // Create a session
             var sessionOptions = new SessionOptions();
 
-            // TODO: Create Inference session
+            Dictionary<string, string> epOptions = new(StringComparer.OrdinalIgnoreCase);
+
+            switch (executionProvider.EpName)
+            {
+                case "VitisAIExecutionProvider":
+                    sessionOptions.AppendExecutionProvider(_ortEnv, [executionProvider], epOptions);
+                    break;
+
+                case "OpenVINOExecutionProvider":
+                    // TODO: Configure threading for OpenVINO EP
+                    sessionOptions.AppendExecutionProvider(_ortEnv, [executionProvider], epOptions);
+                    break;
+
+                case "QNNExecutionProvider":
+                    // TODO: Configure performance mode for QNN EP
+                    sessionOptions.AppendExecutionProvider(_ortEnv, [executionProvider], epOptions);
+                    break;
+
+                case "NvTensorRTRTXExecutionProvider":
+                    // Configure performance mode for TensorRT RTX EP
+                    sessionOptions.AppendExecutionProvider(_ortEnv, [executionProvider], epOptions);
+                    break;
+
+                default:
+                    break;
+            }
 
             return sessionOptions;
         }
