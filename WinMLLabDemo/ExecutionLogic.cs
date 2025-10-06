@@ -36,7 +36,10 @@ namespace WinMLLabDemo
 
         public static async Task InitializeWinMLEPsAsync()
         {
-            // TODO: Get/Initialize execution providers from the WinML
+            // TODO: Get/Initialize execution providers from the
+            var catalog = ExecutionProviderCatalog.GetDefault();
+
+            await catalog.EnsureAndRegisterCertifiedAsync();
         }
 
         public static string CompileModelForExecutionProvider(OrtEpDevice executionProvider)
@@ -49,6 +52,15 @@ namespace WinMLLabDemo
                 var sessionOptions = GetSessionOptions(executionProvider);
 
                 // TODO: Create compilation options, set the input and output, and compile
+                var compileOptions = new OrtModelCompilationOptions(sessionOptions);
+
+                // Set input and output model paths
+                compileOptions.SetInputModelPath(baseModelPath);
+
+                compileOptions.SetOutputModelPath(compiledModelPath);
+
+                // Compile
+                compileOptions.CompileModel();
             }
             catch
             {
@@ -62,8 +74,7 @@ namespace WinMLLabDemo
         {
             var sessionOptions = GetSessionOptions(executionProvider);
 
-            // TODO: Return an inference session
-            throw new NotImplementedException();
+            return new InferenceSession(compiledModelPath, sessionOptions);
         }
 
         public static async Task<string> RunModelAsync(InferenceSession session, string imagePath, string compiledModelPath, OrtEpDevice executionProvider)
@@ -71,8 +82,9 @@ namespace WinMLLabDemo
             // Prepare inputs
             var inputs = await ModelHelpers.BindInputs(imagePath, session);
 
-            // TODO: Run the inference, format and return the results
-            throw new NotImplementedException();
+            using var results = session.Run(inputs);
+
+            return ModelHelpers.FormatResults(results, session);
         }
 
         private static SessionOptions GetSessionOptions(OrtEpDevice executionProvider)
@@ -94,7 +106,7 @@ namespace WinMLLabDemo
                     break;
 
                 case "QNNExecutionProvider":
-                    // TODO: Configure performance mode for QNN EP
+                    epOptions["htp_performance_mode"] = "high_performance";
                     sessionOptions.AppendExecutionProvider(_ortEnv, [executionProvider], epOptions);
                     break;
 
