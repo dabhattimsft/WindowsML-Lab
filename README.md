@@ -1,3 +1,33 @@
+# Introduction
+
+### ONNX
+ONNX (Open Neural Network Exchange). is an open standard for representing machine learning models. It stores the computation graph — the operators and their connections — and the trained weights. The same ONNX file can run on different platforms and hardware without changes. 
+
+### ONNX Runtime (ORT)
+ONNX Runtime, or ORT, is an open‑source engine for running ONNX models. It loads the model graph and weights, executes the operators, and returns the output.
+
+### Execution Provider (EP)
+Execution providers (EPs) are specialized implementations that execute ONNX operations on specific hardware. They act as the interface between ONNX Runtime and hardware-specific libraries to leverage hardware acceleration capabilities. IOW EPs are plug-ins that tell ONNX Runtime where and how to run your model and they abstract the compute backend — CPU, GPU, or NPU
+
+### Model compilation
+Compilation applies graph-level optimizations (fusion, constant folding, memory layout changes etc.) and hardware-specific tuning. E.g. for QNN EP - Compilation step maps ONNX ops → QNN ops. IOW it compiles the ONNX graph into a QNN graph.
+
+### Model loading
+Some of the steps which might be part of model loading are,
+- Read .onnx/.ort file from disk or memory. 
+- Parse protobuf into internal model structure. 
+- Validate opset, schema, and available operators. 
+
+### WindowsML (WinML)
+Windows ML includes a shared, system‑wide copy of ONNX Runtime. When your app runs, the Windows App SDK bootstrapper initializes Windows ML. The runtime detects available processors — CPU, GPU, NPU. It automatically downloads the optimal execution providers for that hardware. Your app can then run AI models immediately, without bundling EPs or creating separate builds for different hardware. EPs are distributed as separate packages and can be updated independently from the operating system. 
+
+Key benefits 
+- Dynamically get the latest EPs — no manual updates. 
+- Shared ONNX Runtime — reduces app size. 
+- Smaller downloads and installs — you don’t carry large EPs in your app. 
+
+The Windows ML API is for acquisition and initialization of execution providers, while the ONNX Runtime API is for execution of machine learning models using those providers
+
 # Windows ML Lab Demo
 
 In this lab demo, we're going to be building an image classification app that can take in any image and locally identify what prominent features might be in the image, like the breed of a dog. We'll be using the ONNX Runtime that ships with WinML, along with an ONNX model we have, and using WinML to dynamically download the EPs for the device.

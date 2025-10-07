@@ -17,7 +17,6 @@ namespace WinMLLabDemo
 
         static ExecutionLogic()
         {
-            // TODO: Initialize the OrtEnv instance
             EnvironmentCreationOptions envOptions = new()
             {
                 logId = "WinMLLabDemo",
@@ -36,7 +35,9 @@ namespace WinMLLabDemo
 
         public static async Task InitializeWinMLEPsAsync()
         {
-            // TODO: Get/Initialize execution providers from the WinML
+            // TODO-1: Get/Initialize execution providers from the WinML
+            // After finishing this step, WinML will find all applicable EPs for your device
+            // download the EP for your device, deploy it and register with ONNX Runtime.
         }
 
         public static string CompileModelForExecutionProvider(OrtEpDevice executionProvider)
@@ -48,7 +49,8 @@ namespace WinMLLabDemo
             {
                 var sessionOptions = GetSessionOptions(executionProvider);
 
-                // TODO: Create compilation options, set the input and output, and compile
+                // TODO-2.2: Create compilation options, set the input and output, and compile.
+                // After finishing this step, a compiled model will be created at 'compiledModelPath'
             }
             catch
             {
@@ -62,7 +64,7 @@ namespace WinMLLabDemo
         {
             var sessionOptions = GetSessionOptions(executionProvider);
 
-            // TODO: Return an inference session
+            // TODO-3: Return an inference session
             throw new NotImplementedException();
         }
 
@@ -71,7 +73,7 @@ namespace WinMLLabDemo
             // Prepare inputs
             var inputs = await ModelHelpers.BindInputs(imagePath, session);
 
-            // TODO: Run the inference, format and return the results
+            // TODO-4: Run the inference, format and return the results
             throw new NotImplementedException();
         }
 
@@ -89,12 +91,12 @@ namespace WinMLLabDemo
                     break;
 
                 case "OpenVINOExecutionProvider":
-                    // TODO: Configure threading for OpenVINO EP
+                    // TODO-2.1: Configure threading for OpenVINO EP
                     sessionOptions.AppendExecutionProvider(_ortEnv, [executionProvider], epOptions);
                     break;
 
                 case "QNNExecutionProvider":
-                    // TODO: Configure performance mode for QNN EP
+                    // TODO-2.1: Configure performance mode for QNN EP
                     sessionOptions.AppendExecutionProvider(_ortEnv, [executionProvider], epOptions);
                     break;
 
