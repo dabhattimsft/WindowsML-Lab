@@ -115,6 +115,11 @@ case "QNNExecutionProvider":
     break;
 ```
 
+[OpenVINO ExecutionProvider (EP) Reference](https://onnxruntime.ai/docs/execution-providers/OpenVINO-ExecutionProvider.html)
+
+[QNN ExecutionProvider (EP) Reference](https://onnxruntime.ai/docs/execution-providers/QNN-ExecutionProvider.html#ep-provider-options)
+
+
 Back in our **ExecutionLogic.cs** file, locate the `CompileModelForExecutionProvider` method. 
 
 Within the `// TODO` in `CompileModelForExecutionProvider`, you'll first need to create a new `compileOptions` via `new OrtModelCompilationOptions(sessionOptions)`, passing in the sessionOptions that are specific to the EP we've selected.
