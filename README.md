@@ -30,3 +30,10 @@ Or
 
 <img width="702" height="180" alt="image" src="https://github.com/user-attachments/assets/1b86b9c7-91e0-4fc1-b235-e387354b07a3" />
 
+
+Can confirm from Settings app as well,
+
+<img width="607" height="441" alt="image" src="https://github.com/user-attachments/assets/72530a86-f499-4937-b8e4-aa851ad9e53e" />
+
+
+
