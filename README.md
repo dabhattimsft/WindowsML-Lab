@@ -25,3 +25,8 @@ The app should look like this when it launches.
 Switch back to the app and click the **Initialize WinML EPs** button, which will call WinML API! You should see either QNNExecutionProvider or OpenVINOExecutionProvider in the list.
 
 <img width="359" height="116" alt="image" src="https://github.com/user-attachments/assets/7c6d7342-d261-4ed0-8683-873e2cf5445c" />
+
+Or
+
+<img width="702" height="180" alt="image" src="https://github.com/user-attachments/assets/1b86b9c7-91e0-4fc1-b235-e387354b07a3" />
+
