@@ -91,12 +91,12 @@ namespace WinMLLabDemo
                     break;
 
                 case "OpenVINOExecutionProvider":
-                    // TODO-2.1: Configure threading for OpenVINO EP
+                    epOptions["num_of_threads"] = "4";
                     sessionOptions.AppendExecutionProvider(_ortEnv, [executionProvider], epOptions);
                     break;
 
                 case "QNNExecutionProvider":
-                    // TODO-2.1: Configure performance mode for QNN EP
+                    epOptions["htp_performance_mode"] = "high_performance";
                     sessionOptions.AppendExecutionProvider(_ortEnv, [executionProvider], epOptions);
                     break;
 
