@@ -194,7 +194,3 @@ Also, feel free to experiment with using the built-in EPs. Click the **CPUExecut
 [Windows ML Overview](https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview)
 
 [Windows ML API Reference](https://learn.microsoft.com/en-us/windows/windows-app-sdk/api/winrt/microsoft.windows.ai.machinelearning?view=windows-app-sdk-1.8)
-
-[QNN ExecutionProvider (EP) Reference](https://onnxruntime.ai/docs/execution-providers/QNN-ExecutionProvider.html#ep-provider-options)
-
-[OpenVINO ExecutionProvider (EP) Reference](https://onnxruntime.ai/docs/execution-providers/OpenVINO-ExecutionProvider.html)
