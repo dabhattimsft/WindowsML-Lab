@@ -44,7 +44,7 @@ In this lab demo, we're going to be building an image classification app that ca
 
 Double click the WinMLLabDemo.sln file in the root directory to open the solution.
 
-<img width="158" height="73" alt="image" src="https://github.com/user-attachments/assets/b2b1787e-e13d-4048-8fe5-0e761ae5e978" />
+<img width="158" height="73" alt="image" src="https://github.com/user-attachments/assets/b2b1787e-e13d-4048-8fe5-0e761ae5e978" /> 
 
 ## Step 2: Deploy the app
 
@@ -98,7 +98,8 @@ With that method implemented, save your changes (`Ctrl+S`) and then press the **
 
 Then, switch back to the app and click the **Initialize WinML EPs** button, which will call the API we just added! The device you're using has NPU and you should see compatible EP in the list.
 
-<img width="359" height="116" alt="image" src="https://github.com/user-attachments/assets/7c6d7342-d261-4ed0-8683-873e2cf5445c" />
+<img width="359" height="116" alt="image" src="https://github.com/user-attachments/assets/7c6d7342-d261-4ed0-8683-873e2cf5445c" /> <img width="350" height="200" alt="image" src="https://github.com/user-attachments/assets/9ae972f9-893d-4444-a61e-bb6b0e10482c" />
+
 
 We still need to implement logic to compile, load, and inference the model, which we'll do in the next steps.
 
