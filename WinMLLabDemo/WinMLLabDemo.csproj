@@ -12,11 +12,51 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="phi3mini\added_tokens.json" />
+    <None Remove="phi3mini\config.json" />
+    <None Remove="phi3mini\configuration_phi3.py" />
+    <None Remove="phi3mini\genai_config.json" />
+    <None Remove="phi3mini\model.onnx" />
+    <None Remove="phi3mini\model.onnx.data" />
+    <None Remove="phi3mini\special_tokens_map.json" />
+    <None Remove="phi3mini\tokenizer.json" />
+    <None Remove="phi3mini\tokenizer.model" />
+    <None Remove="phi3mini\tokenizer_config.json" />
     <None Remove="SqueezeNet.Labels.txt" />
     <None Remove="SqueezeNet.onnx" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="phi3mini\added_tokens.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="phi3mini\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="phi3mini\configuration_phi3.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="phi3mini\genai_config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="phi3mini\model.onnx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="phi3mini\model.onnx.data">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="phi3mini\special_tokens_map.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="phi3mini\tokenizer.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="phi3mini\tokenizer.model">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="phi3mini\tokenizer_config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="SqueezeNet.Labels.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -26,6 +66,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.ML.OnnxRuntimeGenAI" Version="0.10.0" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.250916003" />
     <PackageReference Include="System.Numerics.Tensors" Version="9.0.9" />
   </ItemGroup>

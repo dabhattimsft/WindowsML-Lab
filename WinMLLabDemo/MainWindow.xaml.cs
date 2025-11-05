@@ -1,5 +1,6 @@
 ﻿using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
+using Microsoft.ML.OnnxRuntimeGenAI;
 using Microsoft.Win32;
 using Microsoft.Windows.AI.MachineLearning;
 using Microsoft.Windows.AppNotifications;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Reflection.Emit;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Windows;
@@ -33,7 +35,8 @@ namespace WinMLLabDemo
     /// </summary>
     public partial class MainWindow : Window
     {
-        private InferenceSession? _loadedSession;
+        private Generator? _generator;
+        private Tokenizer? _tokenizer;
         public ObservableCollection<OrtEpDevice> ExecutionProviders { get; set; }
         private string selectedImagePath = string.Empty;
         private OrtEpDevice? selectedExecutionProvider = null;
@@ -53,9 +56,6 @@ namespace WinMLLabDemo
             // Initialize with some sample data
             LoadExecutionProviders();
             WriteToConsole("WinML Demo Application initialized.");
-
-            // Select the default image
-            SelectImage(IOPath.Combine(AppDomain.CurrentDomain.BaseDirectory, "image.jpg"));
         }
 
         private void LoadExecutionProviders()
@@ -77,13 +77,13 @@ namespace WinMLLabDemo
             if (ExecutionProvidersGrid.SelectedItem is OrtEpDevice selectedEP)
             {
                 selectedExecutionProvider = selectedEP;
-                _loadedSession = null;
+                _generator = null;
                 WriteToConsole($"Selected execution provider: {selectedEP.EpName}");
             }
             else
             {
                 selectedExecutionProvider = null;
-                _loadedSession = null;
+                _generator = null;
             }
 
             // Update button states
@@ -96,15 +96,16 @@ namespace WinMLLabDemo
             {
                 CompileModelButton.IsEnabled = false;
                 LoadModelButton.IsEnabled = false;
-                RunButton.IsEnabled = false;
+                StartChatButton.IsEnabled = false;
             }
 
             CompileModelButton.IsEnabled = true;
 
             string compiledModelPath = ModelHelpers.GetCompiledModelPath(selectedExecutionProvider!);
-            LoadModelButton.IsEnabled = File.Exists(compiledModelPath);
+            //LoadModelButton.IsEnabled = File.Exists(compiledModelPath);
+            LoadModelButton.IsEnabled = true;
 
-            RunButton.IsEnabled = _loadedSession != null;
+            StartChatButton.IsEnabled = _generator != null;
         }
 
         private void RefreshEPButton_Click(object sender, RoutedEventArgs e)
@@ -112,9 +113,9 @@ namespace WinMLLabDemo
             LoadExecutionProviders();
             // Reset selection state
             selectedExecutionProvider = null;
-            _loadedSession = null;
+            _generator = null;
             CompileModelButton.IsEnabled = false;
-            RunButton.IsEnabled = false;
+            StartChatButton.IsEnabled = false;
         }
 
         private async void InitializeWinMLEPsButton_Click(object sender, RoutedEventArgs e)
@@ -182,97 +183,62 @@ namespace WinMLLabDemo
             }
         }
 
-        
-
-        private void BrowseImageButton_Click(object sender, RoutedEventArgs e)
+        private async void SendButton_Click(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog
-            {
-                Title = "Select an image file",
-                Filter = "Image files (*.jpg;*.jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp|All files (*.*)|*.*",
-                InitialDirectory = IOPath.Combine(AppDomain.CurrentDomain.BaseDirectory)
-            };
-
-            if (openFileDialog.ShowDialog() == true)
-            {
-                SelectImage(openFileDialog.FileName);
-            }
+            await ExecutionLogic.RunChatInferenceAsync(_tokenizer, _generator);
         }
 
-        private void SelectImage(string filePath)
+        private async void StartChatButton_Click(object sender, RoutedEventArgs e)
         {
-            selectedImagePath = filePath;
-            ImagePathTextBox.Text = selectedImagePath;
-
-            try
-            {
-                // Load and display the selected image
-                var bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.UriSource = new Uri(selectedImagePath);
-                bitmap.DecodePixelWidth = 300; // Limit size for preview
-                bitmap.EndInit();
-                SelectedImage.Source = bitmap;
-
-                WriteToConsole($"Selected image: {IOPath.GetFileName(selectedImagePath)}");
-            }
-            catch (Exception ex)
-            {
-                WriteToConsole($"Error loading image: {ex.Message}");
-            }
-        }
-
-        private async void RunButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (string.IsNullOrEmpty(selectedImagePath))
-            {
-                WriteToConsole("Please select an image first.");
-                return;
-            }
-
-            if (selectedExecutionProvider == null)
-            {
-                WriteToConsole("Please select an execution provider first.");
-                return;
-            }
-
-            string compiledModelPath = ModelHelpers.GetCompiledModelPath(selectedExecutionProvider);
-            if (!File.Exists(compiledModelPath))
-            {
-                WriteToConsole("Compiled model not found. Please compile the model first.");
-                return;
-            }
-
-            WriteToConsole($"Running classification on: {IOPath.GetFileName(selectedImagePath)}");
-            WriteToConsole($"Using execution provider: {selectedExecutionProvider.EpName}");
-            WriteToConsole($"Using compiled model: {IOPath.GetFileName(compiledModelPath)}");
-            
-            // Disable all buttons during inference
-            CompileModelButton.IsEnabled = false;
-            LoadModelButton.IsEnabled = false;
-            RunButton.IsEnabled = false;
-            
-            try
-            {
-                ResultsTextBlock.Text = "Running classification ...";
-                DateTime start = DateTime.Now;
-                var results = await Task.Run(() => ExecutionLogic.RunModelAsync(_loadedSession, selectedImagePath, compiledModelPath, selectedExecutionProvider));
-                ResultsTextBlock.Text = results;
-                var time = DateTime.Now - start;
-                WriteToConsole($"Classification completed successfully in {time.TotalMilliseconds} ms.");
-            }
-            catch (Exception ex)
-            {
-                WriteToConsole($"Error during classification: {ex.Message}");
-                ResultsTextBlock.Text = $"Error during classification: {ex.Message}";
-            }
-            finally
-            {
-                // Re-enable the button
-                CompileModelButton.IsEnabled = true;
-                LoadModelButton.IsEnabled = true;
-                RunButton.IsEnabled = true;
-            }
+            //if (string.IsNullOrEmpty(selectedImagePath))
+            //{
+            //    WriteToConsole("Please select an image first.");
+            //    return;
+            //}
+            //
+            //if (selectedExecutionProvider == null)
+            //{
+            //    WriteToConsole("Please select an execution provider first.");
+            //    return;
+            //}
+            //
+            //string compiledModelPath = ModelHelpers.GetCompiledModelPath(selectedExecutionProvider);
+            //if (!File.Exists(compiledModelPath))
+            //{
+            //    WriteToConsole("Compiled model not found. Please compile the model first.");
+            //    return;
+            //}
+            //
+            //WriteToConsole($"Running classification on: {IOPath.GetFileName(selectedImagePath)}");
+            //WriteToConsole($"Using execution provider: {selectedExecutionProvider.EpName}");
+            //WriteToConsole($"Using compiled model: {IOPath.GetFileName(compiledModelPath)}");
+            //
+            //// Disable all buttons during inference
+            //CompileModelButton.IsEnabled = false;
+            //LoadModelButton.IsEnabled = false;
+            //RunButton.IsEnabled = false;
+            //
+            //try
+            //{
+            //    ResultsTextBlock.Text = "Running classification ...";
+            //    DateTime start = DateTime.Now;
+            //    var results = await Task.Run(() => ExecutionLogic.RunModelAsync(_generator, selectedImagePath, compiledModelPath, selectedExecutionProvider));
+            //    ResultsTextBlock.Text = results;
+            //    var time = DateTime.Now - start;
+            //    WriteToConsole($"Classification completed successfully in {time.TotalMilliseconds} ms.");
+            //}
+            //catch (Exception ex)
+            //{
+            //    WriteToConsole($"Error during classification: {ex.Message}");
+            //    ResultsTextBlock.Text = $"Error during classification: {ex.Message}";
+            //}
+            //finally
+            //{
+            //    // Re-enable the button
+            //    CompileModelButton.IsEnabled = true;
+            //    LoadModelButton.IsEnabled = true;
+            //    RunButton.IsEnabled = true;
+            //}
         }
 
         private void ClearConsoleButton_Click(object sender, RoutedEventArgs e)
@@ -306,7 +272,7 @@ namespace WinMLLabDemo
             }
 
             var path = ModelHelpers.GetCompiledModelPath(selectedExecutionProvider);
-            if (!File.Exists(path))
+            if (!Directory.Exists(path))
             {
                 WriteToConsole($"Compiled model not found: {path}");
                 return;
@@ -316,10 +282,10 @@ namespace WinMLLabDemo
             {
                 WriteToConsole($"Loading model for execution provider: {selectedExecutionProvider.EpName}");
                 DateTime start = DateTime.Now;
-                _loadedSession = await Task.Run(() => ExecutionLogic.LoadModel(ModelHelpers.GetCompiledModelPath(selectedExecutionProvider), selectedExecutionProvider));
+                (_tokenizer, _generator) = await Task.Run(() => ExecutionLogic.LoadModel(ModelHelpers.GetCompiledModelPath(selectedExecutionProvider), selectedExecutionProvider));
                 var elapsed = DateTime.Now - start;
                 WriteToConsole($"Model loaded successfully in {elapsed.TotalMilliseconds} ms.");
-                RunButton.IsEnabled = true;
+                StartChatButton.IsEnabled = true;
             }
             catch (Exception ex)
             {

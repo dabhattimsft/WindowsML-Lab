@@ -4,6 +4,6 @@
              xmlns:local="clr-namespace:WinMLLabDemo"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <local:MessageBackgroundConverter x:Key="MessageBackgroundConverter"/>
     </Application.Resources>
 </Application>

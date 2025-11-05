@@ -55,39 +55,17 @@
                 </Grid>
             </GroupBox>
             
-            <!-- Right Section: Image Classification -->
-            <GroupBox Grid.Column="1" Header="Image Classification" Margin="10">
+            <!-- Right Section: Chat Interface -->
+            <GroupBox Grid.Column="1" Header="Chat" Margin="10">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     
-                    <!-- File picker section -->
+                    <!-- Model Control Buttons -->
                     <Grid Grid.Row="0" Margin="0,0,0,10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <TextBox x:Name="ImagePathTextBox" Grid.Column="0"
-                                 Height="30" VerticalContentAlignment="Center"
-                                 IsReadOnly="True" Margin="0,0,10,0"/>
-                        <Button x:Name="BrowseImageButton" Grid.Column="1"
-                                Content="Browse..." Width="80" Height="30"
-                                Click="BrowseImageButton_Click"/>
-                    </Grid>
-                    
-                    <!-- Selected image preview -->
-                    <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="1" 
-                            Height="150" Margin="0,0,0,10">
-                        <Image x:Name="SelectedImage" Stretch="Uniform"/>
-                    </Border>
-                    
-                    <!-- Compile and Run buttons -->
-                    <Grid Grid.Row="2" Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
@@ -100,30 +78,61 @@
                                 IsEnabled="False"
                                 Click="CompileModelButton_Click"/>
 
-
                         <Button x:Name="LoadModelButton" Grid.Column="1"
                                 Content="Load Model" Height="35" 
                                 FontWeight="Bold" Margin="0,0,5,0"
                                 IsEnabled="False"
                                 Click="LoadModelButton_Click"/>
 
-                        <Button x:Name="RunButton" Grid.Column="2"
-                                Content="Run Classification" Height="35" 
+                        <Button x:Name="StartChatButton" Grid.Column="2"
+                                Content="Start Chat Session" Height="35" 
                                 FontWeight="Bold" Margin="5,0,0,0"
                                 IsEnabled="False"
-                                Click="RunButton_Click"/>
+                                Click="StartChatButton_Click"/>
                     </Grid>
                     
-                    <!-- Classification results -->
-                    <GroupBox Grid.Row="3" Header="Classification Results">
-                        <ScrollViewer VerticalScrollBarVisibility="Auto">
-                            <TextBlock x:Name="ResultsTextBlock" 
-                                       TextWrapping="Wrap" 
-                                       FontFamily="Consolas"
-                                       Background="White"
-                                       Padding="5"/>
-                        </ScrollViewer>
-                    </GroupBox>
+                    <!-- Chat Messages Area -->
+                    <ScrollViewer Grid.Row="1" Margin="0,0,0,10" 
+                                 VerticalScrollBarVisibility="Auto"
+                                 Name="ChatScrollViewer">
+                        <ItemsControl x:Name="ChatMessages">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="5" 
+                                            Padding="10"
+                                            Background="{Binding IsUser, Converter={StaticResource MessageBackgroundConverter}}"
+                                            BorderBrush="Gray"
+                                            BorderThickness="1"
+                                            CornerRadius="5">
+                                        <TextBlock Text="{Binding Message}" 
+                                                   TextWrapping="Wrap"/>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    
+                    <!-- Input Area -->
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBox x:Name="MessageInput"
+                                 Height="50"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 VerticalAlignment="Center"
+                                 Margin="0,0,10,0"/>
+                        
+                        <Button x:Name="SendButton"
+                                Grid.Column="1"
+                                Content="Send"
+                                Width="80"
+                                Height="35"
+                                Click="SendButton_Click"/>
+                    </Grid>
                 </Grid>
             </GroupBox>
         </Grid>

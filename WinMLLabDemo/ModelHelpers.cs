@@ -205,16 +205,18 @@ namespace WinMLLabDemo
 
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
-            // CPU and DML don't need to be compiled
-            switch (ep.EpName)
-            {
-                case "CPUExecutionProvider":
-                case "DmlExecutionProvider":
-                    return IOPath.Combine(baseDirectory, $"{ModelName}{ModelExtension}");
-            }
+            return IOPath.Combine(baseDirectory, "phi3mini");
 
-            string compiledModelName = $"{ep.EpName}.{ModelName}{ModelExtension}";
-            return IOPath.Combine(baseDirectory, compiledModelName);
+            //// CPU and DML don't need to be compiled
+            //switch (ep.EpName)
+            //{
+            //    case "CPUExecutionProvider":
+            //    case "DmlExecutionProvider":
+            //        return IOPath.Combine(baseDirectory, "phi3mini");
+            //}
+
+            //string compiledModelName = $"{ep.EpName}.{ModelName}{ModelExtension}";
+            //return IOPath.Combine(baseDirectory, compiledModelName);
         }
     }
 }

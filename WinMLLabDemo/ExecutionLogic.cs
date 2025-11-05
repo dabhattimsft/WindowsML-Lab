@@ -1,4 +1,6 @@
 ﻿using Microsoft.ML.OnnxRuntime;
+using Microsoft.ML.OnnxRuntime.Tensors;
+using Microsoft.ML.OnnxRuntimeGenAI;
 using Microsoft.Windows.AI.MachineLearning;
 using System;
 using System.Collections.Generic;
@@ -12,7 +14,7 @@ namespace WinMLLabDemo
     internal static class ExecutionLogic
     {
         private static OrtEnv _ortEnv;
-        private const string ModelName = "SqueezeNet";
+        private const string ModelName = "phi-3-mini";
         private const string ModelExtension = ".onnx";
 
         static ExecutionLogic()
@@ -38,6 +40,9 @@ namespace WinMLLabDemo
             // TODO-1: Get/Initialize execution providers from the WinML
             // After finishing this step, WinML will find all applicable EPs for your device
             // download the EP for your device, deploy it and register with ONNX Runtime.
+            var catalog = ExecutionProviderCatalog.GetDefault();
+
+            await catalog.EnsureAndRegisterCertifiedAsync();
         }
 
         public static string CompileModelForExecutionProvider(OrtEpDevice executionProvider)
@@ -51,6 +56,8 @@ namespace WinMLLabDemo
 
                 // TODO-2.2: Create compilation options, set the input and output, and compile.
                 // After finishing this step, a compiled model will be created at 'compiledModelPath'
+
+// TODOTODO
             }
             catch
             {
@@ -60,20 +67,47 @@ namespace WinMLLabDemo
             return compiledModelPath;
         }
 
-        public static InferenceSession LoadModel(string compiledModelPath, OrtEpDevice executionProvider)
+        public static (Tokenizer tokenizer, Generator generator)  LoadModel(string compiledModelPath, OrtEpDevice executionProvider)
         {
             var sessionOptions = GetSessionOptions(executionProvider);
 
-            // TODO-3: Return an inference session
-            throw new NotImplementedException();
+
+            Config config = new Config(compiledModelPath);
+            config.ClearProviders();
+            config.AppendProvider(executionProvider.EpName);
+
+            switch (executionProvider.EpName)
+            {
+
+                case "OpenVINOExecutionProvider":
+                    config.SetProviderOption(executionProvider.EpName, "num_of_threads", "4");
+                    break;
+
+                case "QNNExecutionProvider":
+                    config.SetProviderOption(executionProvider.EpName, "htp_performance_mode", "high_performance");
+                    break;
+
+                default:
+                    break;
+            }
+
+            Model model = new Model(config);
+            Tokenizer tokenizer = new Tokenizer(model);
+
+            GeneratorParams generatorParams = new GeneratorParams(model);
+            generatorParams.SetSearchOption("min_length", 50);
+            generatorParams.SetSearchOption("max_length", 500);
+            var generator = new Generator(model, generatorParams);
+
+            return (tokenizer, generator);
         }
 
-        public static async Task<string> RunModelAsync(InferenceSession session, string imagePath, string compiledModelPath, OrtEpDevice executionProvider)
+        public static async Task<string> RunChatInferenceAsync(Tokenizer tokenizer, Generator generator)
         {
-            // Prepare inputs
-            var inputs = await ModelHelpers.BindInputs(imagePath, session);
+            using var tokenizerStream = tokenizer.CreateStream();
 
-            // TODO-4: Run the inference, format and return the results
+
+
             throw new NotImplementedException();
         }
 
