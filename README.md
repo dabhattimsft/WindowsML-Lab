@@ -5,6 +5,10 @@ ONNX (Open Neural Network Exchange). is an open standard for representing machin
 
 You can visualize onnx files on <https://netron.app/>
 
+Here's part of Squeezenet model,
+
+<img width="500" height="800" alt="image" src="https://github.com/user-attachments/assets/f3902f50-10ea-403c-9117-0d0ddf9d0491" />
+
 ### ONNX Runtime (ORT)
 ONNX Runtime, or ORT, is an open‑source engine for running ONNX models. It loads the model graph and weights, executes the operators, and returns the output.
 
