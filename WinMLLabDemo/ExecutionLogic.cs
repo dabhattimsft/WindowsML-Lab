@@ -49,7 +49,7 @@ namespace WinMLLabDemo
             {
                 var sessionOptions = GetSessionOptions(executionProvider);
 
-                // TODO-2.2: Create compilation options, set the input and output, and compile.
+                // TODO-2: Create compilation options, set the input and output, and compile.
                 // After finishing this step, a compiled model will be created at 'compiledModelPath'
             }
             catch
