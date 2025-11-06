@@ -12,15 +12,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="SqueezeNet.Labels.txt" />
-    <None Remove="SqueezeNet.onnx" />
+    <None Remove="ResNet50.Labels.txt" />
+    <None Remove="ResNet50.LICENSE.txt" />
+    <None Remove="ResNet50.onnx" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="SqueezeNet.Labels.txt">
+    <Content Include="ResNet50.Labels.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="SqueezeNet.onnx">
+    <Content Include="ResNet50.LICENSE.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ResNet50.onnx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

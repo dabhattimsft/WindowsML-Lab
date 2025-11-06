@@ -37,7 +37,7 @@ namespace WinMLLabDemo
         public ObservableCollection<OrtEpDevice> ExecutionProviders { get; set; }
         private string selectedImagePath = string.Empty;
         private OrtEpDevice? selectedExecutionProvider = null;
-        private const string ModelName = "SqueezeNet";
+        private const string ModelName = "ResNet";
         private const string ModelExtension = ".onnx";
 
         public MainWindow()

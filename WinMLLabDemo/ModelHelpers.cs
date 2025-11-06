@@ -17,7 +17,7 @@ namespace WinMLLabDemo
 {
     internal static class ModelHelpers
     {
-        private const string ModelName = "SqueezeNet";
+        private const string ModelName = "ResNet50";
         private const string ModelExtension = ".onnx";
 
         public static string FormatResults(IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results, InferenceSession session)
@@ -27,7 +27,7 @@ namespace WinMLLabDemo
             float[] resultTensor = results.First(r => r.Name == outputName).AsEnumerable<float>().ToArray();
 
             // Load labels from deployed app root directory and print results
-            string labelsPath = IOPath.Combine(AppDomain.CurrentDomain.BaseDirectory, "SqueezeNet.Labels.txt");
+            string labelsPath = IOPath.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{ModelName}.Labels.txt");
             IList<string> labels = ModelHelpers.LoadLabels(labelsPath);
             return FormatResults(labels, resultTensor);
         }
