@@ -69,7 +69,6 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         
                         <Button x:Name="CompileModelButton" Grid.Column="0"
@@ -83,12 +82,6 @@
                                 FontWeight="Bold" Margin="0,0,5,0"
                                 IsEnabled="False"
                                 Click="LoadModelButton_Click"/>
-
-                        <Button x:Name="StartChatButton" Grid.Column="2"
-                                Content="Start Chat Session" Height="35" 
-                                FontWeight="Bold" Margin="5,0,0,0"
-                                IsEnabled="False"
-                                Click="StartChatButton_Click"/>
                     </Grid>
                     
                     <!-- Chat Messages Area -->
@@ -131,6 +124,7 @@
                                 Content="Send"
                                 Width="80"
                                 Height="35"
+                                IsEnabled="False"
                                 Click="SendButton_Click"/>
                     </Grid>
                 </Grid>

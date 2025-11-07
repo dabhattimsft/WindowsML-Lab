@@ -1,0 +1,66 @@
+{
+  "models": [
+    {
+      "name": "phi-3-mini",
+      "id": "phi-3-mini",
+      "version": "3.0.0",
+      "publisher": "microsoft",
+      "executionProviders": [
+        {
+          "name": "CPUExecutionProvider",
+          "minimumDriverVersion": "0.0.0.0"
+        },
+        {
+          "name": "OpenVINOExecutionProvider",
+          "minimumDriverVersion": "0.0.0.0"
+        },
+        {
+          "name": "QNNExecutionProvider"
+        }
+      ],
+      "modelSizeBytes": 2775883574,
+      "license": "MIT",
+      "licenseUri": "https://choosealicense.com/licenses/mit/",
+      "licenseText": "MIT license",
+      "uri": "https://huggingface.co/microsoft/Phi-3-mini-128k-instruct-onnx/resolve/main/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4",
+      "files": [
+        {
+          "name": "added_tokens.json",
+          "sha256": "f8e5a880c6c563a126d9efacb654e105fc4b66f21e5a540f04436e9487a955fb"
+        },
+        {
+          "name": "config.json",
+          "sha256": "238d73feedf558b3dfca8e74d27ad0f8a769163aaac4b330f995ba2b633ea6a8"
+        },
+        {
+          "name": "genai_config.json",
+          "sha256": "2aa6f742b2f0a7034248fc92188b97c3705ccbbc11311413cdebc1b9e94e0e80"
+        },
+        {
+          "name": "phi3-mini-128k-instruct-cpu-int4-rtn-block-32-acc-level-4.onnx",
+          "sha256": "f22fca92fd03c5efa368a06f5bb668015d3a36677c01b241dda31af758f3d888"
+        },
+        {
+          "name": "phi3-mini-128k-instruct-cpu-int4-rtn-block-32-acc-level-4.onnx.data",
+          "sha256": "c0a595a4eac2075818630d881e8cb2b8e97cb85ee6a0ff63d68c4b9a9a05a1c9"
+        },
+        {
+          "name": "special_tokens_map.json",
+          "sha256": "810adc6e6c6ef2f56c285ef930d243358a3a9f05e36a01c5a10bafc6fac4609b"
+        },
+        {
+          "name": "tokenizer.json",
+          "sha256": "072ab882d6c7192a42f78790945d16c064691321a73251a4b18f6a380f0fbe39"
+        },
+        {
+          "name": "tokenizer.model",
+          "sha256": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347"
+        },
+        {
+          "name": "tokenizer_config.json",
+          "sha256": "aaa87217a0f61c684cdc8703d3d4030a1f5b1077183610b61a14d7f28addbb58"
+        }
+      ]
+    }
+  ]
+}

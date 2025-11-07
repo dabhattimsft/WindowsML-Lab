@@ -1,6 +1,7 @@
 ﻿using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using Microsoft.ML.OnnxRuntimeGenAI;
+using Microsoft.VisualBasic;
 using Microsoft.Windows.AI.MachineLearning;
 using System;
 using System.Collections.Generic;
@@ -67,10 +68,36 @@ namespace WinMLLabDemo
             return compiledModelPath;
         }
 
-        public static (Tokenizer tokenizer, Generator generator)  LoadModel(string compiledModelPath, OrtEpDevice executionProvider)
+        public static async Task<string> DownloadModel(Action<double> progressCallback)
+        {
+            // WindowsML-Lab-phi: Get the model catalog
+            string catalogJsonPath = IOPath.Combine(AppDomain.CurrentDomain.BaseDirectory, "modelCatalog.json");
+            var catalogUri = new Uri(catalogJsonPath);
+            var modelCatalogSource = await ModelCatalogSource.CreateFromUriAsync(catalogUri);
+
+            var modelCatalog = new ModelCatalog(new ModelCatalogSource[] { modelCatalogSource });
+
+            // WindowsML-Lab-phi: Find "phi-3-mini" model
+            var modelInfo = await modelCatalog.FindModelAsync("phi-3-mini");
+
+            // WindowsML-Lab-phi: Download the model with progress reporting.
+            // NOTE: ModelCatalog API handles caching, so if the model is already downloaded, it won't download it again.
+            var getInstanceOp = modelInfo.GetInstanceAsync();
+            getInstanceOp.Progress = (op, progress) =>
+            {
+                progressCallback?.Invoke(progress);
+            };
+
+            var result = await getInstanceOp.AsTask();
+
+            // WindowsML-Lab-phi: Return model path
+            var modelInstance = result.GetInstance();
+            return modelInstance.ModelPaths[0];
+        }
+
+        public static async Task<(Tokenizer tokenizer, Generator generator)> LoadModel(string compiledModelPath, OrtEpDevice executionProvider)
         {
             var sessionOptions = GetSessionOptions(executionProvider);
-
 
             Config config = new Config(compiledModelPath);
             config.ClearProviders();
@@ -78,7 +105,6 @@ namespace WinMLLabDemo
 
             switch (executionProvider.EpName)
             {
-
                 case "OpenVINOExecutionProvider":
                     config.SetProviderOption(executionProvider.EpName, "num_of_threads", "4");
                     break;
@@ -102,13 +128,30 @@ namespace WinMLLabDemo
             return (tokenizer, generator);
         }
 
-        public static async Task<string> RunChatInferenceAsync(Tokenizer tokenizer, Generator generator)
+        public static async Task<string> GenerateModelResponseAsync(
+            Tokenizer tokenizer,
+            Generator generator,
+            string userPrompt,
+            Action<string> onTokenGenerated)
         {
             using var tokenizerStream = tokenizer.CreateStream();
+            string messages = $@"[{{""role"":""system"",""content"":""You are a helpful AI assistant.""}},{{""role"":""user"",""content"":""{userPrompt}""}}]";
 
+            var sequences = tokenizer.Encode(tokenizer.ApplyChatTemplate("", messages, "", true));
+            generator.AppendTokenSequences(sequences);
 
+            StringBuilder response = new StringBuilder();
+            while (!generator.IsDone())
+            {
+                generator.GenerateNextToken();
+                string token = tokenizerStream.Decode(generator.GetSequence(0)[^1]);
+                response.Append(token);
 
-            throw new NotImplementedException();
+                // Call the callback with the current response
+                onTokenGenerated?.Invoke(response.ToString());
+            }
+
+            return response.ToString();
         }
 
         private static SessionOptions GetSessionOptions(OrtEpDevice executionProvider)

@@ -38,6 +38,8 @@ namespace WinMLLabDemo
         private Generator? _generator;
         private Tokenizer? _tokenizer;
         public ObservableCollection<OrtEpDevice> ExecutionProviders { get; set; }
+        public ObservableCollection<ChatMessage> Messages { get; set; } = new ObservableCollection<ChatMessage>();
+
         private string selectedImagePath = string.Empty;
         private OrtEpDevice? selectedExecutionProvider = null;
         private const string ModelName = "SqueezeNet";
@@ -50,9 +52,13 @@ namespace WinMLLabDemo
             ExecutionProviders = new ObservableCollection<OrtEpDevice>();
             ExecutionProvidersGrid.ItemsSource = ExecutionProviders;
             
+            // Initialize Messages collection and bind to ChatMessages ItemsControl
+            Messages = new ObservableCollection<ChatMessage>();
+            ChatMessages.ItemsSource = Messages;
+            
             // Set up EP selection event
             ExecutionProvidersGrid.SelectionChanged += ExecutionProvidersGrid_SelectionChanged;
-            
+
             // Initialize with some sample data
             LoadExecutionProviders();
             WriteToConsole("WinML Demo Application initialized.");
@@ -96,16 +102,15 @@ namespace WinMLLabDemo
             {
                 CompileModelButton.IsEnabled = false;
                 LoadModelButton.IsEnabled = false;
-                StartChatButton.IsEnabled = false;
+                //StartChatButton.IsEnabled = false;
             }
 
             CompileModelButton.IsEnabled = true;
 
             string compiledModelPath = ModelHelpers.GetCompiledModelPath(selectedExecutionProvider!);
-            //LoadModelButton.IsEnabled = File.Exists(compiledModelPath);
             LoadModelButton.IsEnabled = true;
 
-            StartChatButton.IsEnabled = _generator != null;
+            //StartChatButton.IsEnabled = _generator != null;
         }
 
         private void RefreshEPButton_Click(object sender, RoutedEventArgs e)
@@ -115,7 +120,7 @@ namespace WinMLLabDemo
             selectedExecutionProvider = null;
             _generator = null;
             CompileModelButton.IsEnabled = false;
-            StartChatButton.IsEnabled = false;
+            //StartChatButton.IsEnabled = false;
         }
 
         private async void InitializeWinMLEPsButton_Click(object sender, RoutedEventArgs e)
@@ -185,60 +190,54 @@ namespace WinMLLabDemo
 
         private async void SendButton_Click(object sender, RoutedEventArgs e)
         {
-            await ExecutionLogic.RunChatInferenceAsync(_tokenizer, _generator);
-        }
+            if (string.IsNullOrWhiteSpace(MessageInput.Text))
+                return;
 
-        private async void StartChatButton_Click(object sender, RoutedEventArgs e)
-        {
-            //if (string.IsNullOrEmpty(selectedImagePath))
-            //{
-            //    WriteToConsole("Please select an image first.");
-            //    return;
-            //}
-            //
-            //if (selectedExecutionProvider == null)
-            //{
-            //    WriteToConsole("Please select an execution provider first.");
-            //    return;
-            //}
-            //
-            //string compiledModelPath = ModelHelpers.GetCompiledModelPath(selectedExecutionProvider);
-            //if (!File.Exists(compiledModelPath))
-            //{
-            //    WriteToConsole("Compiled model not found. Please compile the model first.");
-            //    return;
-            //}
-            //
-            //WriteToConsole($"Running classification on: {IOPath.GetFileName(selectedImagePath)}");
-            //WriteToConsole($"Using execution provider: {selectedExecutionProvider.EpName}");
-            //WriteToConsole($"Using compiled model: {IOPath.GetFileName(compiledModelPath)}");
-            //
-            //// Disable all buttons during inference
-            //CompileModelButton.IsEnabled = false;
-            //LoadModelButton.IsEnabled = false;
-            //RunButton.IsEnabled = false;
-            //
-            //try
-            //{
-            //    ResultsTextBlock.Text = "Running classification ...";
-            //    DateTime start = DateTime.Now;
-            //    var results = await Task.Run(() => ExecutionLogic.RunModelAsync(_generator, selectedImagePath, compiledModelPath, selectedExecutionProvider));
-            //    ResultsTextBlock.Text = results;
-            //    var time = DateTime.Now - start;
-            //    WriteToConsole($"Classification completed successfully in {time.TotalMilliseconds} ms.");
-            //}
-            //catch (Exception ex)
-            //{
-            //    WriteToConsole($"Error during classification: {ex.Message}");
-            //    ResultsTextBlock.Text = $"Error during classification: {ex.Message}";
-            //}
-            //finally
-            //{
-            //    // Re-enable the button
-            //    CompileModelButton.IsEnabled = true;
-            //    LoadModelButton.IsEnabled = true;
-            //    RunButton.IsEnabled = true;
-            //}
+            if (_generator == null || _tokenizer == null)
+            {
+                Messages.Add(new ChatMessage("Please load the model first.", false));
+                return;
+            }
+
+            // Get and store the user's message
+            string userPrompt = MessageInput.Text;
+            Messages.Add(new ChatMessage(userPrompt, true));
+
+            // Clear input and scroll to bottom
+            MessageInput.Clear();
+            ChatScrollViewer.ScrollToBottom();
+
+            try
+            {
+                // Create AI message first
+                var modelMessage = new ChatMessage("", false);
+                Messages.Add(modelMessage);
+
+                await Task.Run(async () =>
+                {
+                    string response = await ExecutionLogic.GenerateModelResponseAsync(
+                        _tokenizer, 
+                        _generator, 
+                        userPrompt,
+                        token =>
+                        {
+                            // Update UI on the UI thread for each token generated
+                            Dispatcher.Invoke(() =>
+                            {
+                                modelMessage.Message = token;
+                                ChatScrollViewer.ScrollToBottom();
+                            });
+                        });
+
+                    // Final update to model message with the complete response
+                    modelMessage.Message = response;
+                });
+            }
+            catch (Exception ex)
+            {
+                Messages.Add(new ChatMessage($"Error: {ex.Message}", false));
+                WriteToConsole($"Error during chat: {ex.Message}");
+            }
         }
 
         private void ClearConsoleButton_Click(object sender, RoutedEventArgs e)
@@ -271,21 +270,26 @@ namespace WinMLLabDemo
                 return;
             }
 
-            var path = ModelHelpers.GetCompiledModelPath(selectedExecutionProvider);
-            if (!Directory.Exists(path))
-            {
-                WriteToConsole($"Compiled model not found: {path}");
-                return;
-            }
-
             try
-            {
-                WriteToConsole($"Loading model for execution provider: {selectedExecutionProvider.EpName}");
+            {   
+                // Download model if needed
+                DateTime modelDownloadStart = DateTime.Now;
+                WriteToConsole($"Downloading model if not already downloaded...");
+                var modelPath = await ExecutionLogic.DownloadModel(progress => 
+                {
+                    WriteToConsole($"Model download progress: {progress}%");
+                });
+                var modelDownloadElapsed = DateTime.Now - modelDownloadStart;
+                WriteToConsole($"Model downloaded successfully in {modelDownloadElapsed.TotalMilliseconds} ms.");
+
+                // Load model
                 DateTime start = DateTime.Now;
-                (_tokenizer, _generator) = await Task.Run(() => ExecutionLogic.LoadModel(ModelHelpers.GetCompiledModelPath(selectedExecutionProvider), selectedExecutionProvider));
+                WriteToConsole($"Loading model for execution provider: {selectedExecutionProvider.EpName}");
+                (_tokenizer, _generator) = await Task.Run(() => ExecutionLogic.LoadModel(modelPath, selectedExecutionProvider));
                 var elapsed = DateTime.Now - start;
                 WriteToConsole($"Model loaded successfully in {elapsed.TotalMilliseconds} ms.");
-                StartChatButton.IsEnabled = true;
+
+                SendButton.IsEnabled = true;
             }
             catch (Exception ex)
             {
