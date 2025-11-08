@@ -42,8 +42,7 @@ namespace WinMLLabDemo
 
         private string selectedImagePath = string.Empty;
         private OrtEpDevice? selectedExecutionProvider = null;
-        private const string ModelName = "SqueezeNet";
-        private const string ModelExtension = ".onnx";
+        private string _modelFolderPath = null;
 
         public MainWindow()
         {
@@ -84,12 +83,16 @@ namespace WinMLLabDemo
             {
                 selectedExecutionProvider = selectedEP;
                 _generator = null;
+                _tokenizer = null;
+                SendButton.IsEnabled = false;
                 WriteToConsole($"Selected execution provider: {selectedEP.EpName}");
             }
             else
             {
                 selectedExecutionProvider = null;
                 _generator = null;
+                _tokenizer = null;
+                SendButton.IsEnabled = false;
             }
 
             // Update button states
@@ -100,17 +103,16 @@ namespace WinMLLabDemo
         {
             if (selectedExecutionProvider == null)
             {
-                CompileModelButton.IsEnabled = false;
                 LoadModelButton.IsEnabled = false;
-                //StartChatButton.IsEnabled = false;
             }
 
-            CompileModelButton.IsEnabled = true;
+            if (_modelFolderPath == null)
+            {
+                LoadModelButton.IsEnabled = false;
+                return;
+            }
 
-            string compiledModelPath = ModelHelpers.GetCompiledModelPath(selectedExecutionProvider!);
-            LoadModelButton.IsEnabled = true;
-
-            //StartChatButton.IsEnabled = _generator != null;
+            LoadModelButton.IsEnabled = Directory.Exists(_modelFolderPath);
         }
 
         private void RefreshEPButton_Click(object sender, RoutedEventArgs e)
@@ -119,8 +121,8 @@ namespace WinMLLabDemo
             // Reset selection state
             selectedExecutionProvider = null;
             _generator = null;
-            CompileModelButton.IsEnabled = false;
-            //StartChatButton.IsEnabled = false;
+            _tokenizer = null;
+            SendButton.IsEnabled = false;
         }
 
         private async void InitializeWinMLEPsButton_Click(object sender, RoutedEventArgs e)
@@ -148,43 +150,63 @@ namespace WinMLLabDemo
             }
         }
 
-        private async void CompileModelButton_Click(object sender, RoutedEventArgs e)
+
+        private async void DownloadModelButton_Click(object sender, RoutedEventArgs e)
         {
             if (selectedExecutionProvider == null)
             {
-                WriteToConsole("No execution provider selected.");
+                WriteToConsole("Please select an execution provider first.");
                 return;
             }
 
-            switch (selectedExecutionProvider.EpName)
-            {
-                case "CPUExecutionProvider":
-                case "DmlExecutionProvider":
-                    WriteToConsole("Compiling isn't necessary for CPU or DML EPs");
-                    return;
-            }
-
-            CompileModelButton.IsEnabled = false;
             try
             {
-                WriteToConsole($"Compiling model for {selectedExecutionProvider.EpName}...");
-                var now = DateTime.Now;
+                // Download model if needed
+                DateTime modelDownloadStart = DateTime.Now;
+                WriteToConsole($"Downloading model if not already downloaded...");
+                _modelFolderPath = await ExecutionLogic.DownloadModel(progress =>
+                {
+                    WriteToConsole($"Model download progress: {progress}%");
+                });
+                var modelDownloadElapsed = DateTime.Now - modelDownloadStart;
+                WriteToConsole($"Model downloaded successfully in {modelDownloadElapsed.TotalMilliseconds} ms.");
 
-                string compiledModelPath = await Task.Run(() => ExecutionLogic.CompileModelForExecutionProvider(selectedExecutionProvider));
-
-                var elapsed = DateTime.Now - now;
-                WriteToConsole($"Model compiled successfully in {elapsed.TotalMilliseconds} ms: {compiledModelPath}");
-                
-                // Update Run button state
                 UpdateButtonStates();
             }
             catch (Exception ex)
             {
-                WriteToConsole($"Error compiling model: {ex.Message}");
+                WriteToConsole($"Error loading model: {ex.Message}");
             }
-            finally
+        }
+
+        private async void LoadModelButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (selectedExecutionProvider == null)
             {
-                CompileModelButton.IsEnabled = true;
+                WriteToConsole("Please select an execution provider first.");
+                return;
+            }
+
+            if (_modelFolderPath == null)
+            {
+                WriteToConsole("Model not downloaded yet. Please download the model first.");
+                return;
+            }
+
+            try
+            {
+                // Load model
+                DateTime start = DateTime.Now;
+                WriteToConsole($"Loading model for execution provider: {selectedExecutionProvider.EpName}");
+                (_tokenizer, _generator) = await Task.Run(() => ExecutionLogic.LoadModel(_modelFolderPath, selectedExecutionProvider));
+                var elapsed = DateTime.Now - start;
+                WriteToConsole($"Model loaded successfully in {elapsed.TotalMilliseconds} ms.");
+
+                SendButton.IsEnabled = true;
+            }
+            catch (Exception ex)
+            {
+                WriteToConsole($"Error loading model: {ex.Message}");
             }
         }
 
@@ -260,41 +282,6 @@ namespace WinMLLabDemo
                     scrollViewer.ScrollToEnd();
                 }
             });
-        }
-
-        private async void LoadModelButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (selectedExecutionProvider == null)
-            { 
-                WriteToConsole("Please select an execution provider first.");
-                return;
-            }
-
-            try
-            {   
-                // Download model if needed
-                DateTime modelDownloadStart = DateTime.Now;
-                WriteToConsole($"Downloading model if not already downloaded...");
-                var modelPath = await ExecutionLogic.DownloadModel(progress => 
-                {
-                    WriteToConsole($"Model download progress: {progress}%");
-                });
-                var modelDownloadElapsed = DateTime.Now - modelDownloadStart;
-                WriteToConsole($"Model downloaded successfully in {modelDownloadElapsed.TotalMilliseconds} ms.");
-
-                // Load model
-                DateTime start = DateTime.Now;
-                WriteToConsole($"Loading model for execution provider: {selectedExecutionProvider.EpName}");
-                (_tokenizer, _generator) = await Task.Run(() => ExecutionLogic.LoadModel(modelPath, selectedExecutionProvider));
-                var elapsed = DateTime.Now - start;
-                WriteToConsole($"Model loaded successfully in {elapsed.TotalMilliseconds} ms.");
-
-                SendButton.IsEnabled = true;
-            }
-            catch (Exception ex)
-            {
-                WriteToConsole($"Error loading model: {ex.Message}");
-            }
         }
     }
 }

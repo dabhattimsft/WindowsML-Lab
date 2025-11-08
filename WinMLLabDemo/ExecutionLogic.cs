@@ -46,28 +46,7 @@ namespace WinMLLabDemo
             await catalog.EnsureAndRegisterCertifiedAsync();
         }
 
-        public static string CompileModelForExecutionProvider(OrtEpDevice executionProvider)
-        {
-            string baseModelPath = IOPath.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{ModelName}{ModelExtension}");
-            string compiledModelPath = ModelHelpers.GetCompiledModelPath(executionProvider);
-
-            try
-            {
-                var sessionOptions = GetSessionOptions(executionProvider);
-
-                // TODO-2.2: Create compilation options, set the input and output, and compile.
-                // After finishing this step, a compiled model will be created at 'compiledModelPath'
-
-// TODOTODO
-            }
-            catch
-            {
-                throw new Exception($"Failed to create session with execution provider: {executionProvider.EpName}");
-            }
-
-            return compiledModelPath;
-        }
-
+        // WindowsML-Lab-phi: download model
         public static async Task<string> DownloadModel(Action<double> progressCallback)
         {
             // WindowsML-Lab-phi: Get the model catalog
@@ -95,11 +74,11 @@ namespace WinMLLabDemo
             return modelInstance.ModelPaths[0];
         }
 
-        public static async Task<(Tokenizer tokenizer, Generator generator)> LoadModel(string compiledModelPath, OrtEpDevice executionProvider)
+        // WindowsML-Lab-phi: load model
+        public static async Task<(Tokenizer tokenizer, Generator generator)> LoadModel(string modelFolder, OrtEpDevice executionProvider)
         {
-            var sessionOptions = GetSessionOptions(executionProvider);
-
-            Config config = new Config(compiledModelPath);
+            // WindowsML-Lab-phi: Configure ONNX Runtime GenAI model settings:
+            Config config = new Config(modelFolder);
             config.ClearProviders();
             config.AppendProvider(executionProvider.EpName);
 
@@ -113,80 +92,66 @@ namespace WinMLLabDemo
                     config.SetProviderOption(executionProvider.EpName, "htp_performance_mode", "high_performance");
                     break;
 
+                case "NvTensorRTRTXExecutionProvider":
+                    config.SetProviderOption(executionProvider.EpName, "enable_cuda_graph", "true");
+                    break;
+
+                case "VitisAIExecutionProvider":
+                    config.SetProviderOption(executionProvider.EpName, "log_level", "info");
+                    break;
+
                 default:
                     break;
             }
 
+            // WindowsML-Lab-phi: Initialize ONNX Runtime GenAI components for text generation:
+            // WindowsML-Lab-phi:  Model - Loads the ONNX model with the specified configuration and execution provider
             Model model = new Model(config);
+            // WindowsML-Lab-phi: Tokenizer - Handles text-to-token conversion and vice versa for model input/output
             Tokenizer tokenizer = new Tokenizer(model);
 
+            // WindowsML-Lab-phi: GeneratorParams - Configures generation constraints (min 50, max 500 tokens)
             GeneratorParams generatorParams = new GeneratorParams(model);
             generatorParams.SetSearchOption("min_length", 50);
             generatorParams.SetSearchOption("max_length", 500);
+
+            // - Generator: Performs the actual text generation using the model and parameters
             var generator = new Generator(model, generatorParams);
 
             return (tokenizer, generator);
         }
 
+        // WindowsML-Lab-phi: generate response
         public static async Task<string> GenerateModelResponseAsync(
             Tokenizer tokenizer,
             Generator generator,
             string userPrompt,
             Action<string> onTokenGenerated)
         {
+            // WindowsML-Lab-phi: Give instructions to the model.
+            // WindowsML-Lab-phi: Create a tokenizer stream for efficient token-by-token decoding during generation
             using var tokenizerStream = tokenizer.CreateStream();
             string messages = $@"[{{""role"":""system"",""content"":""You are a helpful AI assistant.""}},{{""role"":""user"",""content"":""{userPrompt}""}}]";
 
+             // WindowsML-Lab-phi: Apply the model's chat template and encode the formatted text into token sequences
             var sequences = tokenizer.Encode(tokenizer.ApplyChatTemplate("", messages, "", true));
+
+            // WindowsML-Lab-phi: Feed the tokenized input to the generator as initial context
             generator.AppendTokenSequences(sequences);
 
+            // WindowsML-Lab-phi: Generate response from the model.
             StringBuilder response = new StringBuilder();
             while (!generator.IsDone())
             {
+                // WindowsML-Lab-phi: Generate next token and decode.
                 generator.GenerateNextToken();
                 string token = tokenizerStream.Decode(generator.GetSequence(0)[^1]);
                 response.Append(token);
 
-                // Call the callback with the current response
                 onTokenGenerated?.Invoke(response.ToString());
             }
 
             return response.ToString();
-        }
-
-        private static SessionOptions GetSessionOptions(OrtEpDevice executionProvider)
-        {
-            // Create a session
-            var sessionOptions = new SessionOptions();
-
-            Dictionary<string, string> epOptions = new(StringComparer.OrdinalIgnoreCase);
-
-            switch (executionProvider.EpName)
-            {
-                case "VitisAIExecutionProvider":
-                    sessionOptions.AppendExecutionProvider(_ortEnv, [executionProvider], epOptions);
-                    break;
-
-                case "OpenVINOExecutionProvider":
-                    // TODO-2.1: Configure threading for OpenVINO EP
-                    sessionOptions.AppendExecutionProvider(_ortEnv, [executionProvider], epOptions);
-                    break;
-
-                case "QNNExecutionProvider":
-                    // TODO-2.1: Configure performance mode for QNN EP
-                    sessionOptions.AppendExecutionProvider(_ortEnv, [executionProvider], epOptions);
-                    break;
-
-                case "NvTensorRTRTXExecutionProvider":
-                    // Configure performance mode for TensorRT RTX EP
-                    sessionOptions.AppendExecutionProvider(_ortEnv, [executionProvider], epOptions);
-                    break;
-
-                default:
-                    break;
-            }
-
-            return sessionOptions;
         }
     }
 }

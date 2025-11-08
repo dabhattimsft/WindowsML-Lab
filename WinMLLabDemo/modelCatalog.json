@@ -11,6 +11,9 @@
           "minimumDriverVersion": "0.0.0.0"
         },
         {
+          "name": "DmlExecutionProvider"
+        },
+        {
           "name": "OpenVINOExecutionProvider",
           "minimumDriverVersion": "0.0.0.0"
         },
