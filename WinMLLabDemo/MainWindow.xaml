@@ -92,22 +92,29 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        
-                        <Button x:Name="CompileModelButton" Grid.Column="0"
+
+                        <Button x:Name="DownloadModelButton" Grid.Column="0"
+                                Content="Download Model" Height="35" 
+                                FontWeight="Bold" Margin="0,0,5,0"
+                                IsEnabled="true"
+                                Click="DownloadModelButton_Click"/>
+
+                        <Button x:Name="CompileModelButton" Grid.Column="1"
                                 Content="Compile Model" Height="35" 
                                 FontWeight="Bold" Margin="0,0,5,0"
                                 IsEnabled="False"
                                 Click="CompileModelButton_Click"/>
 
 
-                        <Button x:Name="LoadModelButton" Grid.Column="1"
+                        <Button x:Name="LoadModelButton" Grid.Column="2"
                                 Content="Load Model" Height="35" 
                                 FontWeight="Bold" Margin="0,0,5,0"
                                 IsEnabled="False"
                                 Click="LoadModelButton_Click"/>
 
-                        <Button x:Name="RunButton" Grid.Column="2"
+                        <Button x:Name="RunButton" Grid.Column="3"
                                 Content="Run Classification" Height="35" 
                                 FontWeight="Bold" Margin="5,0,0,0"
                                 IsEnabled="False"

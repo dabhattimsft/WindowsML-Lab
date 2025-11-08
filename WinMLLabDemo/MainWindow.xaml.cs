@@ -37,8 +37,7 @@ namespace WinMLLabDemo
         public ObservableCollection<OrtEpDevice> ExecutionProviders { get; set; }
         private string selectedImagePath = string.Empty;
         private OrtEpDevice? selectedExecutionProvider = null;
-        private const string ModelName = "SqueezeNet";
-        private const string ModelExtension = ".onnx";
+        private string _modelFolderPath = null;
 
         public MainWindow()
         {
@@ -99,9 +98,17 @@ namespace WinMLLabDemo
                 RunButton.IsEnabled = false;
             }
 
+            if (_modelFolderPath == null)
+            {
+                CompileModelButton.IsEnabled = false;
+                LoadModelButton.IsEnabled = false;
+                RunButton.IsEnabled = false;
+                return;
+            }
+
             CompileModelButton.IsEnabled = true;
 
-            string compiledModelPath = ModelHelpers.GetCompiledModelPath(selectedExecutionProvider!);
+            string compiledModelPath = ModelHelpers.GetCompiledModelPath(_modelFolderPath, selectedExecutionProvider!);
             LoadModelButton.IsEnabled = File.Exists(compiledModelPath);
 
             RunButton.IsEnabled = _loadedSession != null;
@@ -150,6 +157,12 @@ namespace WinMLLabDemo
                 return;
             }
 
+            if (_modelFolderPath == null)
+            {
+                WriteToConsole("Model not downloaded yet. Please download the model first.");
+                return;
+            }
+
             switch (selectedExecutionProvider.EpName)
             {
                 case "CPUExecutionProvider":
@@ -164,7 +177,7 @@ namespace WinMLLabDemo
                 WriteToConsole($"Compiling model for {selectedExecutionProvider.EpName}...");
                 var now = DateTime.Now;
 
-                string compiledModelPath = await Task.Run(() => ExecutionLogic.CompileModelForExecutionProvider(selectedExecutionProvider));
+                string compiledModelPath = await Task.Run(() => ExecutionLogic.CompileModelForExecutionProvider(_modelFolderPath, selectedExecutionProvider));
 
                 var elapsed = DateTime.Now - now;
                 WriteToConsole($"Model compiled successfully in {elapsed.TotalMilliseconds} ms: {compiledModelPath}");
@@ -236,7 +249,13 @@ namespace WinMLLabDemo
                 return;
             }
 
-            string compiledModelPath = ModelHelpers.GetCompiledModelPath(selectedExecutionProvider);
+            if (_modelFolderPath == null)
+            {
+                WriteToConsole("Model not downloaded yet. Please download the model first.");
+                return;
+            }
+
+            string compiledModelPath = ModelHelpers.GetCompiledModelPath(_modelFolderPath, selectedExecutionProvider);
             if (!File.Exists(compiledModelPath))
             {
                 WriteToConsole("Compiled model not found. Please compile the model first.");
@@ -245,18 +264,19 @@ namespace WinMLLabDemo
 
             WriteToConsole($"Running classification on: {IOPath.GetFileName(selectedImagePath)}");
             WriteToConsole($"Using execution provider: {selectedExecutionProvider.EpName}");
-            WriteToConsole($"Using compiled model: {IOPath.GetFileName(compiledModelPath)}");
+            WriteToConsole($"Using model: {compiledModelPath}");
             
             // Disable all buttons during inference
             CompileModelButton.IsEnabled = false;
             LoadModelButton.IsEnabled = false;
             RunButton.IsEnabled = false;
-            
+            DownloadModelButton.IsEnabled = false;
+
             try
             {
                 ResultsTextBlock.Text = "Running classification ...";
                 DateTime start = DateTime.Now;
-                var results = await Task.Run(() => ExecutionLogic.RunModelAsync(_loadedSession, selectedImagePath, compiledModelPath, selectedExecutionProvider));
+                var results = await Task.Run(() => ExecutionLogic.RunModelAsync(_loadedSession, selectedImagePath, _modelFolderPath, selectedExecutionProvider));
                 ResultsTextBlock.Text = results;
                 var time = DateTime.Now - start;
                 WriteToConsole($"Classification completed successfully in {time.TotalMilliseconds} ms.");
@@ -300,12 +320,18 @@ namespace WinMLLabDemo
         private async void LoadModelButton_Click(object sender, RoutedEventArgs e)
         {
             if (selectedExecutionProvider == null)
-            { 
+            {
                 WriteToConsole("Please select an execution provider first.");
                 return;
             }
 
-            var path = ModelHelpers.GetCompiledModelPath(selectedExecutionProvider);
+            if (_modelFolderPath == null)
+            {
+                WriteToConsole("Model not downloaded yet. Please download the model first.");
+                return;
+            }
+
+            var path = ModelHelpers.GetCompiledModelPath(_modelFolderPath, selectedExecutionProvider);
             if (!File.Exists(path))
             {
                 WriteToConsole($"Compiled model not found: {path}");
@@ -316,10 +342,39 @@ namespace WinMLLabDemo
             {
                 WriteToConsole($"Loading model for execution provider: {selectedExecutionProvider.EpName}");
                 DateTime start = DateTime.Now;
-                _loadedSession = await Task.Run(() => ExecutionLogic.LoadModel(ModelHelpers.GetCompiledModelPath(selectedExecutionProvider), selectedExecutionProvider));
+                var compiledModelPath = ModelHelpers.GetCompiledModelPath(_modelFolderPath, selectedExecutionProvider);
+                _loadedSession = await Task.Run(() => ExecutionLogic.LoadModel(compiledModelPath, selectedExecutionProvider));
                 var elapsed = DateTime.Now - start;
-                WriteToConsole($"Model loaded successfully in {elapsed.TotalMilliseconds} ms.");
+                WriteToConsole($"Model loaded successfully in {elapsed.TotalMilliseconds} ms from {compiledModelPath}");
                 RunButton.IsEnabled = true;
+            }
+            catch (Exception ex)
+            {
+                WriteToConsole($"Error loading model: {ex.Message}");
+            }
+        }
+
+        private async void DownloadModelButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (selectedExecutionProvider == null)
+            { 
+                WriteToConsole("Please select an execution provider first.");
+                return;
+            }
+
+            try
+            {
+                // Download model if needed
+                DateTime modelDownloadStart = DateTime.Now;
+                WriteToConsole($"Downloading model if not already downloaded...");
+                _modelFolderPath = await ExecutionLogic.DownloadModel(progress =>
+                {
+                    WriteToConsole($"Model download progress: {progress}%");
+                });
+                var modelDownloadElapsed = DateTime.Now - modelDownloadStart;
+                WriteToConsole($"Model downloaded successfully in {modelDownloadElapsed.TotalMilliseconds} ms.");
+
+                UpdateButtonStates();
             }
             catch (Exception ex)
             {

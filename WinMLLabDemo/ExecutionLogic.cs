@@ -38,12 +38,16 @@ namespace WinMLLabDemo
             // TODO-1: Get/Initialize execution providers from the WinML
             // After finishing this step, WinML will find all applicable EPs for your device
             // download the EP for your device, deploy it and register with ONNX Runtime.
+
+            var catalog = ExecutionProviderCatalog.GetDefault();
+
+            await catalog.EnsureAndRegisterCertifiedAsync();
         }
 
-        public static string CompileModelForExecutionProvider(OrtEpDevice executionProvider)
+        public static string CompileModelForExecutionProvider(string modelFolder, OrtEpDevice executionProvider)
         {
-            string baseModelPath = IOPath.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{ModelName}{ModelExtension}");
-            string compiledModelPath = ModelHelpers.GetCompiledModelPath(executionProvider);
+            string baseModelPath = IOPath.Combine(modelFolder, $"{ModelName}{ModelExtension}");
+            string compiledModelPath = ModelHelpers.GetCompiledModelPath(modelFolder, executionProvider);
 
             try
             {
@@ -51,6 +55,14 @@ namespace WinMLLabDemo
 
                 // TODO-2.2: Create compilation options, set the input and output, and compile.
                 // After finishing this step, a compiled model will be created at 'compiledModelPath'
+
+                var compileOptions = new OrtModelCompilationOptions(sessionOptions);
+
+                compileOptions.SetInputModelPath(baseModelPath);
+                compileOptions.SetOutputModelPath(compiledModelPath);
+
+                // Compile the model
+                compileOptions.CompileModel();
             }
             catch
             {
@@ -60,21 +72,51 @@ namespace WinMLLabDemo
             return compiledModelPath;
         }
 
+        // WindowsML - Model Catalog
+        public static async Task<string> DownloadModel(Action<double> progressCallback)
+        {
+            // Get the model catalog
+            string catalogJsonPath = IOPath.Combine(AppDomain.CurrentDomain.BaseDirectory, "modelCatalog.json");
+            var catalogUri = new Uri(catalogJsonPath);
+            var modelCatalogSource = await ModelCatalogSource.CreateFromUriAsync(catalogUri);
+
+            var modelCatalog = new ModelCatalog(new ModelCatalogSource[] { modelCatalogSource });
+
+            // Find model
+            var modelInfo = await modelCatalog.FindModelAsync(ModelName);
+
+            // Download the model with progress reporting.
+            // NOTE: ModelCatalog API handles caching, so if the model is already downloaded, it won't download it again.
+            var getInstanceOp = modelInfo.GetInstanceAsync();
+            getInstanceOp.Progress = (op, progress) =>
+            {
+                progressCallback?.Invoke(progress);
+            };
+
+            var result = await getInstanceOp.AsTask();
+
+            // Return model path
+            var modelInstance = result.GetInstance();
+            return modelInstance.ModelPaths[0];
+        }
+
         public static InferenceSession LoadModel(string compiledModelPath, OrtEpDevice executionProvider)
         {
             var sessionOptions = GetSessionOptions(executionProvider);
 
             // TODO-3: Return an inference session
-            throw new NotImplementedException();
+            return new InferenceSession(compiledModelPath, sessionOptions);
         }
 
-        public static async Task<string> RunModelAsync(InferenceSession session, string imagePath, string compiledModelPath, OrtEpDevice executionProvider)
+        public static async Task<string> RunModelAsync(InferenceSession session, string imagePath, string modelFolder, OrtEpDevice executionProvider)
         {
             // Prepare inputs
             var inputs = await ModelHelpers.BindInputs(imagePath, session);
 
             // TODO-4: Run the inference, format and return the results
-            throw new NotImplementedException();
+            using var results = session.Run(inputs);
+
+            return ModelHelpers.FormatResults(modelFolder, results, session);
         }
 
         private static SessionOptions GetSessionOptions(OrtEpDevice executionProvider)

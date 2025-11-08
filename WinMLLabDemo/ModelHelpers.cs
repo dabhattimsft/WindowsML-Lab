@@ -20,14 +20,14 @@ namespace WinMLLabDemo
         private const string ModelName = "SqueezeNet";
         private const string ModelExtension = ".onnx";
 
-        public static string FormatResults(IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results, InferenceSession session)
+        public static string FormatResults(string modelFolder, IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results, InferenceSession session)
         {
             // Extract output tensor
             string outputName = session.OutputMetadata.First().Key;
             float[] resultTensor = results.First(r => r.Name == outputName).AsEnumerable<float>().ToArray();
 
             // Load labels from deployed app root directory and print results
-            string labelsPath = IOPath.Combine(AppDomain.CurrentDomain.BaseDirectory, "SqueezeNet.Labels.txt");
+            string labelsPath = IOPath.Combine(modelFolder, "SqueezeNet.Labels.txt");
             IList<string> labels = ModelHelpers.LoadLabels(labelsPath);
             return FormatResults(labels, resultTensor);
         }
@@ -196,23 +196,27 @@ namespace WinMLLabDemo
             return resized;
         }
 
-        public static string GetCompiledModelPath(OrtEpDevice ep)
+        public static string GetCompiledModelPath(string modelFolder, OrtEpDevice ep)
         {
             if (ep == null)
             {
                 return "";
             }
 
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            if (modelFolder == null)
+            {
+                return "";
+            }
 
             // CPU and DML don't need to be compiled
             switch (ep.EpName)
             {
                 case "CPUExecutionProvider":
                 case "DmlExecutionProvider":
-                    return IOPath.Combine(baseDirectory, $"{ModelName}{ModelExtension}");
+                    return IOPath.Combine(modelFolder, $"{ModelName}{ModelExtension}");
             }
 
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
             string compiledModelName = $"{ep.EpName}.{ModelName}{ModelExtension}";
             return IOPath.Combine(baseDirectory, compiledModelName);
         }
