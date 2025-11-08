@@ -19,7 +19,7 @@
                     "name": "QNNExecutionProvider"
                 }
             ],
-            "modelSizeBytes": 13632917530,
+            "modelSizeBytes": 1270000,
             "license": "BSD",
             "licenseUri": "https://github.com/microsoft/WindowsAppSDK-Samples/blob/main/Samples/WindowsML/Resources/SqueezeNet.LICENSE.txt",
             "licenseText": "This model is provided under the License Terms available at \u003Chttps://github.com/microsoft/WindowsAppSDK-Samples/blob/main/Samples/WindowsML/Resources/SqueezeNet.LICENSE.txt\u003E",
@@ -32,7 +32,7 @@
                 },
                 {
                     "name": "SqueezeNet.Labels.txt",
-                    "uri": "https://github.com/microsoft/Windows-Machine-Learning/blob/02b586811c8beb1ae2208c8605393267051257ae/Samples/SqueezeNetObjectDetection/Desktop/cpp/Labels.txt?raw=true",
+                    "uri": "https://github.com/microsoft/Windows-Machine-Learning/raw/02b586811c8beb1ae2208c8605393267051257ae/Samples/SqueezeNetObjectDetection/Desktop/cpp/Labels.txt",
                     "sha256": "dc1fd0d4747096d3aa690bd65ec2f51fdb3e5117535bfbce46fa91088a8f93a9"
                 },
                 {

@@ -1,3 +1,88 @@
+# Squeezenet demo with ModelCatalog APIs
+
+This uses ModelCatalog APIs of WindowsML to download models dynamically. You can learn more about ModelCatalog APIs here.
+
+Code to download model from catalog,
+```csharp
+        // WindowsML - Model Catalog
+        public static async Task<string> DownloadModel(Action<double> progressCallback)
+        {
+            // Get the model catalog
+            string catalogJsonPath = IOPath.Combine(AppDomain.CurrentDomain.BaseDirectory, "modelCatalog.json");
+            var catalogUri = new Uri(catalogJsonPath);
+            var modelCatalogSource = await ModelCatalogSource.CreateFromUriAsync(catalogUri);
+
+            var modelCatalog = new ModelCatalog(new ModelCatalogSource[] { modelCatalogSource });
+
+            // Find model
+            var modelInfo = await modelCatalog.FindModelAsync(ModelName);
+
+            // Download the model with progress reporting.
+            // NOTE: ModelCatalog API handles caching, so if the model is already downloaded, it won't download it again.
+            var getInstanceOp = modelInfo.GetInstanceAsync();
+            getInstanceOp.Progress = (op, progress) =>
+            {
+                progressCallback?.Invoke(progress);
+            };
+
+            var result = await getInstanceOp.AsTask();
+
+            // Return model path
+            var modelInstance = result.GetInstance();
+            return modelInstance.ModelPaths[0];
+        }
+```
+
+## Model catalog example
+```json
+{
+    "models": [
+        {
+            "name": "squeezenet",
+            "id": "sample-squeezenet",
+            "version": "1",
+            "publisher": "WindowsAppSDK",
+            "executionProviders": [
+                {
+                    "name": "CPUExecutionProvider"
+                },
+                {
+                    "name": "DMLExecutionProvider"
+                },
+                {
+                    "name": "OpenVINOExecutionProvider"
+                },
+                {
+                    "name": "QNNExecutionProvider"
+                }
+            ],
+            "modelSizeBytes": 1270000,
+            "license": "BSD",
+            "licenseUri": "https://github.com/microsoft/WindowsAppSDK-Samples/blob/main/Samples/WindowsML/Resources/SqueezeNet.LICENSE.txt",
+            "licenseText": "This model is provided under the License Terms available at \u003Chttps://github.com/microsoft/WindowsAppSDK-Samples/blob/main/Samples/WindowsML/Resources/SqueezeNet.LICENSE.txt\u003E",
+            "uri": "https://github.com/microsoft/WindowsAppSDK-Samples/raw/refs/heads/main/Samples/WindowsML/Resources",
+            "files": [
+                {
+                    "name": "SqueezeNet.onnx",
+                    "uri": "https://github.com/microsoft/WindowsAppSDK-Samples/raw/refs/heads/main/Samples/WindowsML/Resources/SqueezeNet.onnx",
+                    "sha256": "d7f93e79ba1284a3ff2b4cea317d79f3e98e64acfce725ad5f4e8197864aef73"
+                },
+                {
+                    "name": "SqueezeNet.Labels.txt",
+                    "uri": "https://github.com/microsoft/Windows-Machine-Learning/raw/02b586811c8beb1ae2208c8605393267051257ae/Samples/SqueezeNetObjectDetection/Desktop/cpp/Labels.txt",
+                    "sha256": "dc1fd0d4747096d3aa690bd65ec2f51fdb3e5117535bfbce46fa91088a8f93a9"
+                },
+                {
+                    "name": "image.jpg",
+                    "uri": "https://github.com/microsoft/Windows-Machine-Learning/raw/638cd40abc408e7049219e5d7b4fe164c304f2a2/SharedContent/media/kitten_224.png",
+                    "sha256": "e49fb5cd0c31b07984784e50a809825370d8adeac31c9f86ff396f64da635010"
+                }
+            ]
+        }
+    ]
+}
+```
+
 # Introduction
 
 ### ONNX
