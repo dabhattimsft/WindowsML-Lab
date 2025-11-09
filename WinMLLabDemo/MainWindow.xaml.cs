@@ -82,18 +82,17 @@ namespace WinMLLabDemo
             if (ExecutionProvidersGrid.SelectedItem is OrtEpDevice selectedEP)
             {
                 selectedExecutionProvider = selectedEP;
-                _generator = null;
-                _tokenizer = null;
-                SendButton.IsEnabled = false;
                 WriteToConsole($"Selected execution provider: {selectedEP.EpName}");
             }
             else
             {
                 selectedExecutionProvider = null;
-                _generator = null;
-                _tokenizer = null;
-                SendButton.IsEnabled = false;
             }
+
+            _generator = null;
+            _tokenizer = null;
+            SendButton.IsEnabled = false;
+            LoadModelButton.Content = "Load Model";
 
             // Update button states
             UpdateButtonStates();
@@ -110,6 +109,12 @@ namespace WinMLLabDemo
             {
                 LoadModelButton.IsEnabled = false;
                 return;
+            }
+            else
+            {
+                // Model already downloaded
+                DownloadModelButton.IsEnabled = false;
+                DownloadModelButton.Content = "Model Downloaded";
             }
 
             LoadModelButton.IsEnabled = Directory.Exists(_modelFolderPath);
@@ -202,7 +207,12 @@ namespace WinMLLabDemo
                 var elapsed = DateTime.Now - start;
                 WriteToConsole($"Model loaded successfully in {elapsed.TotalMilliseconds} ms.");
 
+                // Enable chat send button
                 SendButton.IsEnabled = true;
+
+                // Update Load model button
+                LoadModelButton.IsEnabled = false;
+                LoadModelButton.Content = "Model loaded";
             }
             catch (Exception ex)
             {
@@ -259,6 +269,18 @@ namespace WinMLLabDemo
             {
                 Messages.Add(new ChatMessage($"Error: {ex.Message}", false));
                 WriteToConsole($"Error during chat: {ex.Message}");
+            }
+        }
+
+        private void MessageInput_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                // Prevent the Enter key from creating a new line
+                e.Handled = true;
+                
+                // Call the same method that the Send button uses
+                SendButton_Click(sender, e);
             }
         }
 

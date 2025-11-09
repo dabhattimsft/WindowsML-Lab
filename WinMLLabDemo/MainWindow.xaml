@@ -112,13 +112,13 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         
-                        <TextBox x:Name="MessageInput"
+                        <TextBox x:Name="MessageInput" 
+                                 KeyDown="MessageInput_KeyDown"
                                  Height="50"
                                  TextWrapping="Wrap"
-                                 AcceptsReturn="True"
                                  VerticalAlignment="Center"
                                  Margin="0,0,10,0"/>
-                        
+
                         <Button x:Name="SendButton"
                                 Grid.Column="1"
                                 Content="Send"
