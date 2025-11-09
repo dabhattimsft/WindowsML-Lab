@@ -2,8 +2,6 @@
 ## Local language model app
 This is a fork of the demo app. This app utilizes (phi-3 model)[https://azure.microsoft.com/en-us/blog/introducing-phi-3-redefining-whats-possible-with-slms/?msockid=0012df25b14061c52557cc8eb5406fa2] to create a local chat bot.
 
-<Insert GIF>
-
 This is complete app and doesn't have any TODOs. All the relevant logic is in ExecutionLogic.cs and look for **// WindowsML-Lab-phi** comments for more details.
 This branch also uses ModelCatalog APIs of WindowsML to download models dynamically. You can [learn more about ModelCatalog APIs here](https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/model-catalog/overview).
 
@@ -14,7 +12,15 @@ To run this app,
   - Console will show log "Model loaded successfully" and once model is loaded "Send" button will be enabled.
 - Type prompt in the text box and click "Send"
 
-<Insert GIF>
+
+
+https://github.com/user-attachments/assets/2b50e798-b1b8-4955-bb97-f1c04f936b0c
+
+
+https://github.com/user-attachments/assets/2a98f188-1a1a-45f7-8a52-41bdd661c3a3
+
+
+
 
 ### Download Model
 ```csharp
