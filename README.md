@@ -46,7 +46,13 @@ Double click the WinMLLabDemo.sln file in the root directory to open the solutio
 
 <img width="158" height="73" alt="image" src="https://github.com/user-attachments/assets/b2b1787e-e13d-4048-8fe5-0e761ae5e978" /> 
 
-## Step 2: Deploy the app
+## Step 2: Inspect NuGet packages
+
+In Visual Studio, open the *Solution Explorer* and inspect the dependencies of the project. WindowsAppSDK nuget should already be installed but if you dont see that, right click on the solution and click "Restore Nuget Packages". 
+
+<img width="250" height="144" alt="image" src="https://github.com/user-attachments/assets/590e3c54-d7b6-406e-b76d-b9a4860265d4" />
+
+## Step 3: Deploy the app
 
 Click the Start Debugging button to deploy the app. We'll keep it open while we edit, and see changes appear live!
 
@@ -58,11 +64,6 @@ The app should look like this when it launches.
 
 Notice that there are some execution providers that already appear. By default, the CPU and DirectML execution providers are present on all devices. You might have the device with NPU and We're going to use WinML to dynamically download the execution provider that works with your NPU, so that you can run the model on your NPU!
 
-## Step 3: Inspect the NuGet packages
-
-Back in Visual Studio, open the *Solution Explorer* and inspect the dependencies of the project. You need to install the Windows App SDK NuGet package if it is not present.
-
-<img width="250" height="144" alt="image" src="https://github.com/user-attachments/assets/590e3c54-d7b6-406e-b76d-b9a4860265d4" />
 
 ## Step 4: Open the ExecutionLogic.cs file
 
