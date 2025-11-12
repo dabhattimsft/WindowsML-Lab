@@ -47,6 +47,11 @@ https://github.com/user-attachments/assets/2a98f188-1a1a-45f7-8a52-41bdd661c3a3
 
             var result = await getInstanceOp.AsTask();
 
+            if (result.Status != CatalogModelInstanceStatus.Available)
+            {
+                throw new Exception($"Failed to download model: {ModelName}, Error: {result.ExtendedError}");
+            }
+
             // WindowsML-Lab-phi: Return model path
             var modelInstance = result.GetInstance();
             return modelInstance.ModelPaths[0];
@@ -96,7 +101,7 @@ https://github.com/user-attachments/assets/2a98f188-1a1a-45f7-8a52-41bdd661c3a3
             generatorParams.SetSearchOption("min_length", 50);
             generatorParams.SetSearchOption("max_length", 500);
 
-            // - Generator: Performs the actual text generation using the model and parameters
+            // WindowsML-Lab-phi: Generator - Performs the actual text generation using the model and parameters
             var generator = new Generator(model, generatorParams);
 
             return (tokenizer, generator);

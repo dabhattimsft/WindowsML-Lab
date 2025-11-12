@@ -120,7 +120,7 @@ namespace WinMLLabDemo
             generatorParams.SetSearchOption("min_length", 50);
             generatorParams.SetSearchOption("max_length", 500);
 
-            // - Generator: Performs the actual text generation using the model and parameters
+            // WindowsML-Lab-phi: Generator - Performs the actual text generation using the model and parameters
             var generator = new Generator(model, generatorParams);
 
             return (tokenizer, generator);
