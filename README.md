@@ -1,4 +1,10 @@
-# Introduction
+# Windows ML Lab Demo
+
+In this lab demo, we're going to be building an image classification app that can take in any image and locally identify what prominent features might be in the image, like the breed of a dog. We'll be using the ONNX Runtime that ships with WinML, along with an ONNX model we have, and using WinML to dynamically download the EPs for the device.
+
+<img width="1412" height="961" alt="image" src="https://github.com/user-attachments/assets/18c8ff9f-82bb-41c1-8b12-14c3f5a49af3" />
+
+## Introduction
 
 ### ONNX
 ONNX (Open Neural Network Exchange). is an open standard for representing machine learning models. It stores the computation graph — the operators and their connections — and the trained weights. The same ONNX file can run on different platforms and hardware without changes.
@@ -30,11 +36,7 @@ Windows Machine Learning (ML) enables C#, C++, and Python developers to run ONNX
 - Smaller downloads/installs - No need to carry large EPs and the ONNX Runtime in your app
 - Broad hardware support - Runs on all Windows 11 PCs (x64 and ARM64) with any hardware configuration
 
-# Windows ML Lab Demo
-
-In this lab demo, we're going to be building an image classification app that can take in any image and locally identify what prominent features might be in the image, like the breed of a dog. We'll be using the ONNX Runtime that ships with WinML, along with an ONNX model we have, and using WinML to dynamically download the EPs for the device.
-
-<img width="1412" height="961" alt="image" src="https://github.com/user-attachments/assets/18c8ff9f-82bb-41c1-8b12-14c3f5a49af3" />
+# Lab
 
 ## Step 1: Open the solution
 
