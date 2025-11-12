@@ -60,7 +60,7 @@ In Visual Studio, open the *Solution Explorer* and inspect the dependencies of t
 
 ## Step 3: Deploy the app
 
-Click the Start Debugging button to deploy the app. We'll keep it open while we edit, and see changes appear live!
+Click the Start Debugging button to deploy the app.
 
 <img width="269" height="39" alt="image" src="https://github.com/user-attachments/assets/56aeb74f-8efc-420b-9753-3f4a83a041f9" />
 
@@ -79,7 +79,17 @@ Further down in the *Solution Explorer*, find and open the **ExecutionLogic.cs**
 
 ## Step 5: Implement getting new EPs
 
-First, we have to use WinML to see if there are any new EPs, and download them if there are. Update `InitializeWinMLEPsAsync` to call `await catalog.EnsureAndRegisterCertifiedAsync()`.
+In this step we will call WindowsML API which acquires, deploys and registers certified EPs. For this lab, your machines already have these EPs downloaded. So, calling these API will make sure that they are present and will register them with ONNX Runtime. 
+
+These EPs are delivered via Windows Update and You can see them in Update history in Settings app.
+
+<img width="300" alt="image" src="https://github.com/user-attachments/assets/1e2b3f19-6b6c-4b57-977c-2e1e4d1e41e5" />
+
+Switch back to Visual Studio, click on “Stop Debugging”. 
+
+<img width="250" alt="image" src="https://github.com/user-attachments/assets/b1980e41-3933-48f9-8bd1-e155312a70f7" />
+
+In ExecutionLogic.cs, update `InitializeWinMLEPsAsync()` method to call `await catalog.EnsureAndRegisterCertifiedAsync()`.
 
 ```csharp
 public static async Task InitializeWinMLEPsAsync()
@@ -97,18 +107,15 @@ public static async Task InitializeWinMLEPsAsync()
 }
 ```
 
-With that method implemented, save your changes (`Ctrl+S`) and then press the **Hot Reload** button (or `Alt+F10`).
+With that method implemented, save your changes (`Ctrl+S`) and click the Start Debugging button to deploy the app.
+<img width="269" height="39" alt="image" src="https://github.com/user-attachments/assets/56aeb74f-8efc-420b-9753-3f4a83a041f9" />
 
-<img width="135" height="49" alt="image" src="https://github.com/user-attachments/assets/ff0bb80e-f133-4a23-b899-672e69588351" />
-
-> If you get a hot reload error about "Value cannot be null. (Parameter 'key')", click "Edit" then try adding the first line by itself and hot reloading, and then adding the second line (or stop debugging and re-deploy).
-
-Then, switch back to the app and click the **Initialize WinML EPs** button, which will call the API we just added! The device you're using has NPU and you should see compatible EP in the list.
+Click the **Initialize WinML EPs** button, which will call the API we just added! The device you're using has NPU and you should see compatible EP in the list.
 
 <img width="359" height="116" alt="image" src="https://github.com/user-attachments/assets/7c6d7342-d261-4ed0-8683-873e2cf5445c" /> <img width="350" height="200" alt="image" src="https://github.com/user-attachments/assets/9ae972f9-893d-4444-a61e-bb6b0e10482c" />
 
 
-We still need to implement logic to compile, load, and inference the model, which we'll do in the next steps.
+We still need to implement logic to compile, load, and inference the model, which we'll do in the next steps. From here on, we will keep the app open while we edit and see our changes appear live!
 
 ## Step 6: Implement compiling the model
 
