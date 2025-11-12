@@ -2,7 +2,8 @@
 
 In this lab demo, we're going to be building an image classification app that can take in any image and locally identify what prominent features might be in the image, like the breed of a dog. We'll be using the ONNX Runtime that ships with WinML, along with an ONNX model we have, and using WinML to dynamically download the EPs for the device.
 
-<img width="1412" height="961" alt="image" src="https://github.com/user-attachments/assets/18c8ff9f-82bb-41c1-8b12-14c3f5a49af3" />
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/18c8ff9f-82bb-41c1-8b12-14c3f5a49af3" />
+
 
 ## Introduction
 
@@ -10,6 +11,10 @@ In this lab demo, we're going to be building an image classification app that ca
 ONNX (Open Neural Network Exchange). is an open standard for representing machine learning models. It stores the computation graph — the operators and their connections — and the trained weights. The same ONNX file can run on different platforms and hardware without changes.
 
 You can visualize onnx files on <https://netron.app/>
+
+Here's part of Squeezenet model,
+
+<img width="550" height="725" alt="image" src="https://github.com/user-attachments/assets/f3902f50-10ea-403c-9117-0d0ddf9d0491" />
 
 ### ONNX Runtime (ORT)
 ONNX Runtime, or ORT, is an open‑source engine for running ONNX models. It loads the model graph and weights, executes the operators, and returns the output.
@@ -36,15 +41,19 @@ Windows Machine Learning (ML) enables C#, C++, and Python developers to run ONNX
 - Smaller downloads/installs - No need to carry large EPs and the ONNX Runtime in your app
 - Broad hardware support - Runs on all Windows 11 PCs (x64 and ARM64) with any hardware configuration
 
-# Lab
-
 ## Step 1: Open the solution
 
 Double click the WinMLLabDemo.sln file in the root directory to open the solution.
 
-<img width="158" height="73" alt="image" src="https://github.com/user-attachments/assets/b2b1787e-e13d-4048-8fe5-0e761ae5e978" />
+<img width="158" height="73" alt="image" src="https://github.com/user-attachments/assets/b2b1787e-e13d-4048-8fe5-0e761ae5e978" /> 
 
-## Step 2: Deploy the app
+## Step 2: Inspect NuGet packages
+
+In Visual Studio, open the *Solution Explorer* and inspect the dependencies of the project. WindowsAppSDK nuget should already be installed but if you dont see that, right click on the solution and click "Restore Nuget Packages". 
+
+<img width="250" height="144" alt="image" src="https://github.com/user-attachments/assets/590e3c54-d7b6-406e-b76d-b9a4860265d4" />
+
+## Step 3: Deploy the app
 
 Click the Start Debugging button to deploy the app. We'll keep it open while we edit, and see changes appear live!
 
@@ -56,11 +65,6 @@ The app should look like this when it launches.
 
 Notice that there are some execution providers that already appear. By default, the CPU and DirectML execution providers are present on all devices. You might have the device with NPU and We're going to use WinML to dynamically download the execution provider that works with your NPU, so that you can run the model on your NPU!
 
-## Step 3: Inspect the NuGet packages
-
-Back in Visual Studio, open the *Solution Explorer* and inspect the dependencies of the project. You need to install the Windows App SDK NuGet package if it is not present.
-
-<img width="250" height="144" alt="image" src="https://github.com/user-attachments/assets/590e3c54-d7b6-406e-b76d-b9a4860265d4" />
 
 ## Step 4: Open the ExecutionLogic.cs file
 
@@ -75,6 +79,10 @@ First, we have to use WinML to see if there are any new EPs, and download them i
 ```csharp
 public static async Task InitializeWinMLEPsAsync()
 {
+    // TODO-1: Get/Initialize execution providers from the WinML
+    // After finishing this step, WinML will find all applicable EPs for your device
+    // download the EP for your device, deploy it and register with ONNX Runtime.
+
     // Get the WinML EP catalog
     var catalog = ExecutionProviderCatalog.GetDefault();
 
@@ -90,50 +98,34 @@ With that method implemented, save your changes (`Ctrl+S`) and then press the **
 
 > If you get a hot reload error about "Value cannot be null. (Parameter 'key')", click "Edit" then try adding the first line by itself and hot reloading, and then adding the second line (or stop debugging and re-deploy).
 
-Then, switch back to the app and click the **Initialize WinML EPs** button, which will call the API we just added! If you have NPU on your device and if there's a compatible EP available, you should see that in the list.
+Then, switch back to the app and click the **Initialize WinML EPs** button, which will call the API we just added! The device you're using has NPU and you should see compatible EP in the list.
 
-<img width="359" height="116" alt="image" src="https://github.com/user-attachments/assets/7c6d7342-d261-4ed0-8683-873e2cf5445c" />
+<img width="359" height="116" alt="image" src="https://github.com/user-attachments/assets/7c6d7342-d261-4ed0-8683-873e2cf5445c" /> <img width="350" height="200" alt="image" src="https://github.com/user-attachments/assets/9ae972f9-893d-4444-a61e-bb6b0e10482c" />
+
 
 We still need to implement logic to compile, load, and inference the model, which we'll do in the next steps.
 
 ## Step 6: Implement compiling the model
 
-For these hardware-specific EPs, models need to be compiled against the EP before you can use the model. If you don't have NPU on your device or not see EP, we will continue with CPU/DML EP. These EPs don't require compiling the model.
-
-First we will configure session options for EP we have selected.
-Back in our **ExecutionLogic.cs** file, locate `GetSessionOptions` method. Add following options for QNN and OpenVINO. There are other options available as well.
-
-```csharp
-case "OpenVINOExecutionProvider":
-    // Configure threading for OpenVINO EP
-    epOptions["num_of_threads"] = "4";
-    sessionOptions.AppendExecutionProvider(_ortEnv, [executionProvider], epOptions);
-    break;
-
-case "QNNExecutionProvider":
-    // Configure performance mode for QNN EP
-    epOptions["htp_performance_mode"] = "high_performance";
-    sessionOptions.AppendExecutionProvider(_ortEnv, [executionProvider], epOptions);
-    break;
-```
-
-[OpenVINO ExecutionProvider (EP) Reference](https://onnxruntime.ai/docs/execution-providers/OpenVINO-ExecutionProvider.html)
-
-[QNN ExecutionProvider (EP) Reference](https://onnxruntime.ai/docs/execution-providers/QNN-ExecutionProvider.html#ep-provider-options)
-
+For these hardware-specific EPs, models need to be compiled against the EP before you can use the model. 
 
 Back in our **ExecutionLogic.cs** file, locate the `CompileModelForExecutionProvider` method. 
 
-Within the `// TODO` in `CompileModelForExecutionProvider`, you'll first need to create a new `compileOptions` via `new OrtModelCompilationOptions(sessionOptions)`, passing in the sessionOptions that are specific to the EP we've selected.
+Within the `// TODO-2` in `CompileModelForExecutionProvider`, 
 
-Then, you'll need to use `SetInputModelPath` and `SetOutputModelPath` to indicate the source and target model paths.
+- You'll first need to create a new `compileOptions` via `new OrtModelCompilationOptions(sessionOptions)`, passing in the sessionOptions (created via helper `GetSessionOptions`) that are specific to the EP we've selected.
 
-Finally, you'll call `CompileModel` to produce the compiled model.
+- Then, you'll need to use `SetInputModelPath` and `SetOutputModelPath` to indicate the source and target model paths.
+
+- Finally, you'll call `CompileModel` to produce the compiled model.
 
 Your final code within `CompileModelForExecutionProvider` should look something like this...
 
 ```csharp
 var sessionOptions = GetSessionOptions(executionProvider);
+
+// TODO-2: Create compilation options, set the input and output, and compile.
+// After finishing this step, a compiled model will be created at 'compiledModelPath'
 
 // Create compilation options from session options
 var compileOptions = new OrtModelCompilationOptions(sessionOptions);
@@ -148,7 +140,7 @@ compileOptions.CompileModel();
 
 Save your changes (`Ctrl+S`) and then press the **Hot Reload** button (or `Alt+F10`).
 
-Then, switch back to the app, select the **QNNExecutionProvider**/**OpenVINOExecutionProvider**/**NvTensorRtRtxExecutionProvider**/**VitisAIExecutionProvider** EP, and click the **Compile Model** button. This will take ~15 seconds, but in the console output you should eventually see that it outputs a compiled model path!
+Then, switch back to the app, select the **QNNExecutionProvider**/**OpenVINOExecutionProvider** EP, and click the **Compile Model** button. This will take ~15 seconds, but in the console output you should eventually see that it outputs a compiled model path!
 
 <img width="400" alt="image" src="https://github.com/user-attachments/assets/71c02862-09d6-4891-a55e-0476a1603a15" />
 
@@ -156,7 +148,7 @@ The model is now ready to load on the NPU! Note that our app implements caching 
 
 ## Step 7: Implement loading the model
 
-Back in our **ExecutionLogic.cs** file, locate the `LoadModel` method. This uses the same `GetSessionOptions` helper method we saw earlier, but now instead of compiling a model, we need to load the compiled model.
+Back in our **ExecutionLogic.cs** file, locate the `LoadModel` method. This uses the same `GetSessionOptions` helper method to get sessionOptions, but now instead of compiling a model, we need to load the compiled model.
 
 Our method already passes in the compiled model path, so all we have to do is return a new `InferenceSession` with the compiled model path and the session options! Your completed method should look like...
 
@@ -165,6 +157,7 @@ public static InferenceSession LoadModel(string compiledModelPath, OrtEpDevice e
 {
     var sessionOptions = GetSessionOptions(executionProvider);
 
+    // TODO-3: Return an inference session
     // Return an inference session
     return new InferenceSession(compiledModelPath, sessionOptions);
 }
@@ -194,6 +187,7 @@ public static async Task<string> RunModelAsync(InferenceSession session, string 
     // Prepare inputs
     var inputs = await ModelHelpers.BindInputs(imagePath, session);
 
+    // TODO-4: Run the inference, format and return the results
     // Run inference
     using var results = session.Run(inputs);
 
@@ -206,7 +200,7 @@ Save your changes (`Ctrl+S`), press the **Hot Reload** button (or `Alt+F10`), an
 
 <img width="303" height="257" alt="image" src="https://github.com/user-attachments/assets/b536c26d-d9cc-4f3b-91c1-f1dea16d615e" />
 
-You've successfully completed the lab! We used WinML to dynamically download EPs specific to our current device, so that our app didn't have to distribute those EPs ourselves. And then we used the copy of ONNX Runtime within WinML to compile, load, and inference this model on NPU!
+You've successfully completed the lab! We used WinML to get EPs specific to our current device, so that our app didn't have to distribute those EPs ourselves. And then we used the shared copy of ONNX Runtime within WinML to compile, load, and inference this model on NPU!
 
 ## Step 9: Experiment with other images or EPs
 
@@ -218,7 +212,3 @@ Also, feel free to experiment with using the built-in EPs. Click the **CPUExecut
 [Windows ML Overview](https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview)
 
 [Windows ML API Reference](https://learn.microsoft.com/en-us/windows/windows-app-sdk/api/winrt/microsoft.windows.ai.machinelearning?view=windows-app-sdk-1.8)
-
-[QNN ExecutionProvider (EP) Reference](https://onnxruntime.ai/docs/execution-providers/QNN-ExecutionProvider.html#ep-provider-options)
-
-[OpenVINO ExecutionProvider (EP) Reference](https://onnxruntime.ai/docs/execution-providers/OpenVINO-ExecutionProvider.html)
