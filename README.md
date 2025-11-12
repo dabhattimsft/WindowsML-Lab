@@ -4,6 +4,11 @@ In this lab demo, we're going to be building an image classification app that ca
 
 <img width="800" alt="image" src="https://github.com/user-attachments/assets/18c8ff9f-82bb-41c1-8b12-14c3f5a49af3" />
 
+As part of this lab, we will be doing 4 things,
+- Ensure and register Execution Providers with ONNX runtime with help of WindowsML APIs 
+- Compile the SqueezeNet Model
+- Load that compiled model
+- And finally, Run the inference 
 
 ## Introduction
 
