@@ -378,7 +378,7 @@ namespace WinMLLabDemo
             }
             catch (Exception ex)
             {
-                WriteToConsole($"Error loading model: {ex.Message}");
+                WriteToConsole($"Error downloading model: {ex.Message}");
             }
         }
     }

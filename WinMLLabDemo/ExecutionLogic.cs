@@ -95,6 +95,11 @@ namespace WinMLLabDemo
 
             var result = await getInstanceOp.AsTask();
 
+            if (result.Status != CatalogModelInstanceStatus.Available)
+            {
+                throw new Exception($"Failed to download model: {ModelName}");
+            }
+
             // Return model path
             var modelInstance = result.GetInstance();
             return modelInstance.ModelPaths[0];
