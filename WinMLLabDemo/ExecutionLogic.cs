@@ -69,6 +69,11 @@ namespace WinMLLabDemo
 
             var result = await getInstanceOp.AsTask();
 
+            if (result.Status != CatalogModelInstanceStatus.Available)
+            {
+                throw new Exception($"Failed to download model: {ModelName}, Error: {result.ExtendedError}");
+            }
+
             // WindowsML-Lab-phi: Return model path
             var modelInstance = result.GetInstance();
             return modelInstance.ModelPaths[0];
