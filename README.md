@@ -1,4 +1,16 @@
-# Introduction
+# Windows ML Lab Demo
+
+In this lab demo, we're going to be building an image classification app that can take in any image and locally identify what prominent features might be in the image, like the breed of a dog. We'll be using the ONNX Runtime that ships with WinML, along with an ONNX model we have, and using WinML to dynamically download the EPs for the device.
+
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/18c8ff9f-82bb-41c1-8b12-14c3f5a49af3" />
+
+As part of this lab, we will be doing 4 things,
+- Ensure and register Execution Providers with ONNX runtime with help of WindowsML APIs 
+- Compile the SqueezeNet Model
+- Load that compiled model
+- And finally, Run the inference 
+
+## Introduction
 
 ### ONNX
 ONNX (Open Neural Network Exchange). is an open standard for representing machine learning models. It stores the computation graph — the operators and their connections — and the trained weights. The same ONNX file can run on different platforms and hardware without changes.
@@ -34,19 +46,19 @@ Windows Machine Learning (ML) enables C#, C++, and Python developers to run ONNX
 - Smaller downloads/installs - No need to carry large EPs and the ONNX Runtime in your app
 - Broad hardware support - Runs on all Windows 11 PCs (x64 and ARM64) with any hardware configuration
 
-# Windows ML Lab Demo
-
-In this lab demo, we're going to be building an image classification app that can take in any image and locally identify what prominent features might be in the image, like the breed of a dog. We'll be using the ONNX Runtime that ships with WinML, along with an ONNX model we have, and using WinML to dynamically download the EPs for the device.
-
-<img width="1412" height="961" alt="image" src="https://github.com/user-attachments/assets/18c8ff9f-82bb-41c1-8b12-14c3f5a49af3" />
-
 ## Step 1: Open the solution
 
 Double click the WinMLLabDemo.sln file in the root directory to open the solution.
 
-<img width="158" height="73" alt="image" src="https://github.com/user-attachments/assets/b2b1787e-e13d-4048-8fe5-0e761ae5e978" />
+<img width="158" height="73" alt="image" src="https://github.com/user-attachments/assets/b2b1787e-e13d-4048-8fe5-0e761ae5e978" /> 
 
-## Step 2: Deploy the app
+## Step 2: Inspect NuGet packages
+
+In Visual Studio, open the *Solution Explorer* and inspect the dependencies of the project. WindowsAppSDK nuget should already be installed but if you dont see that, right click on the solution and click "Restore Nuget Packages". 
+
+<img width="250" height="144" alt="image" src="https://github.com/user-attachments/assets/590e3c54-d7b6-406e-b76d-b9a4860265d4" />
+
+## Step 3: Deploy the app
 
 Click the Start Debugging button to deploy the app. We'll keep it open while we edit, and see changes appear live!
 
@@ -58,11 +70,6 @@ The app should look like this when it launches.
 
 Notice that there are some execution providers that already appear. By default, the CPU and DirectML execution providers are present on all devices. You might have the device with NPU and We're going to use WinML to dynamically download the execution provider that works with your NPU, so that you can run the model on your NPU!
 
-## Step 3: Inspect the NuGet packages
-
-Back in Visual Studio, open the *Solution Explorer* and inspect the dependencies of the project. You need to install the Windows App SDK NuGet package if it is not present.
-
-<img width="250" height="144" alt="image" src="https://github.com/user-attachments/assets/590e3c54-d7b6-406e-b76d-b9a4860265d4" />
 
 ## Step 4: Open the ExecutionLogic.cs file
 
@@ -98,7 +105,8 @@ With that method implemented, save your changes (`Ctrl+S`) and then press the **
 
 Then, switch back to the app and click the **Initialize WinML EPs** button, which will call the API we just added! The device you're using has NPU and you should see compatible EP in the list.
 
-<img width="359" height="116" alt="image" src="https://github.com/user-attachments/assets/7c6d7342-d261-4ed0-8683-873e2cf5445c" />
+<img width="359" height="116" alt="image" src="https://github.com/user-attachments/assets/7c6d7342-d261-4ed0-8683-873e2cf5445c" /> <img width="350" height="200" alt="image" src="https://github.com/user-attachments/assets/9ae972f9-893d-4444-a61e-bb6b0e10482c" />
+
 
 We still need to implement logic to compile, load, and inference the model, which we'll do in the next steps.
 
@@ -199,11 +207,20 @@ Save your changes (`Ctrl+S`), press the **Hot Reload** button (or `Alt+F10`), an
 
 You've successfully completed the lab! We used WinML to get EPs specific to our current device, so that our app didn't have to distribute those EPs ourselves. And then we used the shared copy of ONNX Runtime within WinML to compile, load, and inference this model on NPU!
 
-## Step 9: Experiment with other images or EPs
+## Step 9: Experiment with other images, EPs and other Models
 
 Feel free to experiment with other images. Click the **Browse** button in the top right and there should be an `image2` image you can select, and then you can run the classification again.
 
 Also, feel free to experiment with using the built-in EPs. Click the **CPUExecutionProvider** or the **DmlExecutionProvider** and then click the **Load Model** button (notice that compiling the model isn't necessary for those), and then click **Run Classification**.
+
+## Step 10: Play with other models and APIs
+There are few more branches on the repo for you to play with WinML.
+- [phi_chat](https://github.com/dabhattimsft/WindowsML-Lab/tree/phi_chat) branch is a fork of the demo app. This app utilizes [phi-3 model](https://azure.microsoft.com/en-us/blog/introducing-phi-3-redefining-whats-possible-with-slms/?msockid=0012df25b14061c52557cc8eb5406fa2) to create a local chat bot.
+  - This is complete app and doesn't have any TODOs. All the relevant logic is in ExecutionLogic.cs and look for **// WindowsML-Lab-phi** comments for more details.
+This branch also uses ModelCatalog APIs of WindowsML to download models dynamically. You can [learn more about ModelCatalog APIs here](https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/model-catalog/overview).
+- [final_resnet50](https://github.com/dabhattimsft/WindowsML-Lab/tree/squeezenet_with_model_catalog) branch uses ResNet-50 model instead of Squeezenet model.
+- [squeezenet_with_model_catalog](https://github.com/dabhattimsft/WindowsML-Lab/tree/squeezenet_with_model_catalog) uses ModelCatalog APIs of WindowsML to download models dynamically.
+
 
 # References
 [Windows ML Overview](https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview)
