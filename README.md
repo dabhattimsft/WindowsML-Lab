@@ -1,6 +1,6 @@
 # Squeezenet demo with ModelCatalog APIs
 
-This uses ModelCatalog APIs of WindowsML to download models dynamically. You can learn more about ModelCatalog APIs here.
+This uses ModelCatalog APIs of WindowsML to download models dynamically. You can [learn more about ModelCatalog APIs here](https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/model-catalog/overview).
 
 Code to download model from catalog,
 ```csharp
