@@ -73,7 +73,11 @@ Notice that there are some execution providers that already appear. By default, 
 
 ## Step 4: Open the ExecutionLogic.cs file
 
-Further down in the *Solution Explorer*, find and open the **ExecutionLogic.cs** file. Notice that we have a static `OrtEnv` initialized and we have default ONNX code for getting the currently available EPs, but there are a variety of `// TODO`'s for WinML-specific logic we'll implement.
+Switch back to Visual Studio, click on “Stop Debugging”. 
+
+<img width="250" alt="image" src="https://github.com/user-attachments/assets/b1980e41-3933-48f9-8bd1-e155312a70f7" />
+
+In the *Solution Explorer*, find and open the **ExecutionLogic.cs** file. Notice that we have a static `OrtEnv` initialized and we have default ONNX code for getting the currently available EPs, but there are a variety of `// TODO`'s for WinML-specific logic we'll implement.
 
 <img width="400" alt="image" src="https://github.com/user-attachments/assets/4fd023ae-9418-40cb-81c3-e5ab7346a0fc" />
 
@@ -84,10 +88,6 @@ In this step we will call WindowsML API which acquires, deploys and registers ce
 These EPs are delivered via Windows Update and You can see them in Update history in Settings app.
 
 <img width="300" alt="image" src="https://github.com/user-attachments/assets/1e2b3f19-6b6c-4b57-977c-2e1e4d1e41e5" />
-
-Switch back to Visual Studio, click on “Stop Debugging”. 
-
-<img width="250" alt="image" src="https://github.com/user-attachments/assets/b1980e41-3933-48f9-8bd1-e155312a70f7" />
 
 In ExecutionLogic.cs, update `InitializeWinMLEPsAsync()` method to call `await catalog.EnsureAndRegisterCertifiedAsync()`.
 
@@ -222,11 +222,11 @@ Also, feel free to experiment with using the built-in EPs. Click the **CPUExecut
 
 ## Step 10: Play with other models and APIs
 There are few more branches on the repo for you to play with WinML.
-- [phi_chat](https://github.com/dabhattimsft/WindowsML-Lab/tree/phi_chat) branch is a fork of the demo app. This app utilizes [phi-3 model](https://azure.microsoft.com/en-us/blog/introducing-phi-3-redefining-whats-possible-with-slms/?msockid=0012df25b14061c52557cc8eb5406fa2) to create a local chat bot.
+- [extra/phi_chat](https://github.com/dabhattimsft/WindowsML-Lab/tree/extra/phi_chat) branch is a fork of the demo app. This app utilizes [phi-3 model](https://azure.microsoft.com/en-us/blog/introducing-phi-3-redefining-whats-possible-with-slms/?msockid=0012df25b14061c52557cc8eb5406fa2) to create a local chat bot.
   - This is complete app and doesn't have any TODOs. All the relevant logic is in ExecutionLogic.cs and look for **// WindowsML-Lab-phi** comments for more details.
 This branch also uses ModelCatalog APIs of WindowsML to download models dynamically. You can [learn more about ModelCatalog APIs here](https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/model-catalog/overview).
-- [final_resnet50](https://github.com/dabhattimsft/WindowsML-Lab/tree/final_resnet50) branch uses ResNet-50 model instead of Squeezenet model.
-- [squeezenet_with_model_catalog](https://github.com/dabhattimsft/WindowsML-Lab/tree/squeezenet_with_model_catalog) uses ModelCatalog APIs of WindowsML to download models dynamically.
+- [extra/final_resnet50](https://github.com/dabhattimsft/WindowsML-Lab/tree/extra/final_resnet50) branch uses ResNet-50 model instead of Squeezenet model.
+- [extra/squeezenet_with_model_catalog](https://github.com/dabhattimsft/WindowsML-Lab/tree/extra/squeezenet_with_model_catalog) uses ModelCatalog APIs of WindowsML to download models dynamically.
 
 
 # References
