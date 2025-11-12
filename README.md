@@ -199,11 +199,19 @@ Save your changes (`Ctrl+S`), press the **Hot Reload** button (or `Alt+F10`), an
 
 You've successfully completed the lab! We used WinML to get EPs specific to our current device, so that our app didn't have to distribute those EPs ourselves. And then we used the shared copy of ONNX Runtime within WinML to compile, load, and inference this model on NPU!
 
-## Step 9: Experiment with other images or EPs
+## Step 9: Experiment with other images, EPs
 
 Feel free to experiment with other images. Click the **Browse** button in the top right and there should be an `image2` image you can select, and then you can run the classification again.
 
 Also, feel free to experiment with using the built-in EPs. Click the **CPUExecutionProvider** or the **DmlExecutionProvider** and then click the **Load Model** button (notice that compiling the model isn't necessary for those), and then click **Run Classification**.
+
+## Step 10: Play with other models and APIs
+There are few more branches on the repo for you to play with WinML.
+- [phi_chat](https://github.com/dabhattimsft/WindowsML-Lab/tree/phi_chat) branch is a fork of the demo app. This app utilizes [phi-3 model](https://azure.microsoft.com/en-us/blog/introducing-phi-3-redefining-whats-possible-with-slms/?msockid=0012df25b14061c52557cc8eb5406fa2) to create a local chat bot.
+  - This is complete app and doesn't have any TODOs. All the relevant logic is in ExecutionLogic.cs and look for **// WindowsML-Lab-phi** comments for more details.
+This branch also uses ModelCatalog APIs of WindowsML to download models dynamically. You can [learn more about ModelCatalog APIs here](https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/model-catalog/overview).
+- [final_resnet50](https://github.com/dabhattimsft/WindowsML-Lab/tree/final_resnet50) branch uses ResNet-50 model instead of Squeezenet model.
+- [squeezenet_with_model_catalog](https://github.com/dabhattimsft/WindowsML-Lab/tree/squeezenet_with_model_catalog) uses ModelCatalog APIs of WindowsML to download models dynamically.
 
 # References
 [Windows ML Overview](https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview)
