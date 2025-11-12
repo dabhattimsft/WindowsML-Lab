@@ -97,7 +97,7 @@ namespace WinMLLabDemo
 
             if (result.Status != CatalogModelInstanceStatus.Available)
             {
-                throw new Exception($"Failed to download model: {ModelName}");
+                throw new Exception($"Failed to download model: {ModelName}, Error: {result.ExtendedError}");
             }
 
             // Return model path
