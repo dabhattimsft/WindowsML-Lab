@@ -12,7 +12,7 @@ namespace WinMLLabDemo
     internal static class ExecutionLogic
     {
         private static OrtEnv _ortEnv;
-        private const string ModelName = "ResNet";
+        private const string ModelName = "ResNet50";
         private const string ModelExtension = ".onnx";
 
         static ExecutionLogic()

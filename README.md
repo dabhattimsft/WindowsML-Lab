@@ -1,13 +1,17 @@
-# Introduction
+This branch uses ResNet-50 model instead of Squeezenet model.
+
+# Windows ML Lab Demo
+
+In this lab demo, we're going to be building an image classification app that can take in any image and locally identify what prominent features might be in the image, like the breed of a dog. We'll be using the ONNX Runtime that ships with WinML, along with an ONNX model we have, and using WinML to dynamically download the EPs for the device.
+
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/18c8ff9f-82bb-41c1-8b12-14c3f5a49af3" />
+
+## Introduction
 
 ### ONNX
 ONNX (Open Neural Network Exchange). is an open standard for representing machine learning models. It stores the computation graph — the operators and their connections — and the trained weights. The same ONNX file can run on different platforms and hardware without changes.
 
 You can visualize onnx files on <https://netron.app/>
-
-Here's part of Squeezenet model,
-
-<img width="550" height="725" alt="image" src="https://github.com/user-attachments/assets/f3902f50-10ea-403c-9117-0d0ddf9d0491" />
 
 ### ONNX Runtime (ORT)
 ONNX Runtime, or ORT, is an open‑source engine for running ONNX models. It loads the model graph and weights, executes the operators, and returns the output.
@@ -34,19 +38,19 @@ Windows Machine Learning (ML) enables C#, C++, and Python developers to run ONNX
 - Smaller downloads/installs - No need to carry large EPs and the ONNX Runtime in your app
 - Broad hardware support - Runs on all Windows 11 PCs (x64 and ARM64) with any hardware configuration
 
-# Windows ML Lab Demo
-
-In this lab demo, we're going to be building an image classification app that can take in any image and locally identify what prominent features might be in the image, like the breed of a dog. We'll be using the ONNX Runtime that ships with WinML, along with an ONNX model we have, and using WinML to dynamically download the EPs for the device.
-
-<img width="1412" height="961" alt="image" src="https://github.com/user-attachments/assets/18c8ff9f-82bb-41c1-8b12-14c3f5a49af3" />
-
 ## Step 1: Open the solution
 
 Double click the WinMLLabDemo.sln file in the root directory to open the solution.
 
 <img width="158" height="73" alt="image" src="https://github.com/user-attachments/assets/b2b1787e-e13d-4048-8fe5-0e761ae5e978" /> 
 
-## Step 2: Deploy the app
+## Step 2: Inspect NuGet packages
+
+In Visual Studio, open the *Solution Explorer* and inspect the dependencies of the project. WindowsAppSDK nuget should already be installed but if you dont see that, right click on the solution and click "Restore Nuget Packages". 
+
+<img width="250" height="144" alt="image" src="https://github.com/user-attachments/assets/590e3c54-d7b6-406e-b76d-b9a4860265d4" />
+
+## Step 3: Deploy the app
 
 Click the Start Debugging button to deploy the app. We'll keep it open while we edit, and see changes appear live!
 
@@ -58,11 +62,6 @@ The app should look like this when it launches.
 
 Notice that there are some execution providers that already appear. By default, the CPU and DirectML execution providers are present on all devices. You might have the device with NPU and We're going to use WinML to dynamically download the execution provider that works with your NPU, so that you can run the model on your NPU!
 
-## Step 3: Inspect the NuGet packages
-
-Back in Visual Studio, open the *Solution Explorer* and inspect the dependencies of the project. You need to install the Windows App SDK NuGet package if it is not present.
-
-<img width="250" height="144" alt="image" src="https://github.com/user-attachments/assets/590e3c54-d7b6-406e-b76d-b9a4860265d4" />
 
 ## Step 4: Open the ExecutionLogic.cs file
 
