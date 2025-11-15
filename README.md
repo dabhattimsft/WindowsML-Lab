@@ -4,12 +4,6 @@ In this lab demo, we're going to be building an image classification app that ca
 
 <img width="800" alt="image" src="https://github.com/user-attachments/assets/18c8ff9f-82bb-41c1-8b12-14c3f5a49af3" />
 
-As part of this lab, we will be doing 4 things,
-- Ensure and register Execution Providers with ONNX runtime with help of WindowsML APIs 
-- Compile the SqueezeNet Model
-- Load that compiled model
-- And finally, Run the inference 
-
 ## Introduction
 
 ### ONNX
@@ -27,15 +21,22 @@ ONNX Runtime, or ORT, is an open‑source engine for running ONNX models. It loa
 ### Execution Provider (EP)
 Execution providers (EPs) are specialized implementations that execute ONNX operations on specific hardware. They act as the interface between ONNX Runtime and hardware-specific libraries to leverage hardware acceleration capabilities. IOW EPs are plug-ins that tell ONNX Runtime where and how to run your model.
 
+### Flow of the lab
+As part of this lab, we will be doing 4 things,
+- Ensure and register Execution Providers with ONNX runtime with help of WindowsML APIs 
+- Compile the SqueezeNet Model
+- Load that compiled model
+- And finally, Run the inference 
+
 ### Model compilation
-Compilation applies graph-level optimizations (e.g. fusion, constant folding, memory layout changes etc.) and hardware-specific tuning.
+For these hardware-specific EPs, models need to be compiled against the EP before you can use the model. Compilation applies graph-level optimizations (e.g. operator fusion, constant folding, memory layout changes etc.) and hardware-specific tuning.
 E.g. for QNN EP - Compilation step maps ONNX ops → QNN ops. IOW it compiles the ONNX graph into a QNN graph.
 
 ### Model loading
 Some of the steps which are part of model loading,
 - Read .onnx file from disk or memory
-- Parse protobuf into internal model structure
-- Validate opset, schema, and available operators
+- deserialization into in-memory data structures
+- Validate opset, schema, and available operators etc.
 
 ### WindowsML (WinML)
 Windows Machine Learning (ML) enables C#, C++, and Python developers to run ONNX AI models locally on Windows PCs via the ONNX Runtime, with automatic execution provider management for different hardware (CPUs, GPUs, NPUs). ONNX Runtime can be used with models from PyTorch, Tensorflow/Keras, TFLite, scikit-learn, and other frameworks. Windows ML provides a shared Windows-wide copy of the ONNX Runtime, plus the ability to dynamically download execution providers (EPs).
