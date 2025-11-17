@@ -45,10 +45,10 @@ namespace WinMLLabDemo
 
             ExecutionProviders = new ObservableCollection<OrtEpDevice>();
             ExecutionProvidersGrid.ItemsSource = ExecutionProviders;
-            
+
             // Set up EP selection event
             ExecutionProvidersGrid.SelectionChanged += ExecutionProvidersGrid_SelectionChanged;
-            
+
             // Initialize with some sample data
             LoadExecutionProviders();
             WriteToConsole("WinML Demo Application initialized.");
@@ -181,7 +181,7 @@ namespace WinMLLabDemo
 
                 var elapsed = DateTime.Now - now;
                 WriteToConsole($"Model compiled successfully in {elapsed.TotalMilliseconds} ms: {compiledModelPath}");
-                
+
                 // Update Run button state
                 UpdateButtonStates();
             }
@@ -195,7 +195,7 @@ namespace WinMLLabDemo
             }
         }
 
-        
+
 
         private void BrowseImageButton_Click(object sender, RoutedEventArgs e)
         {
@@ -265,12 +265,12 @@ namespace WinMLLabDemo
             WriteToConsole($"Running classification on: {IOPath.GetFileName(selectedImagePath)}");
             WriteToConsole($"Using execution provider: {selectedExecutionProvider.EpName}");
             WriteToConsole($"Using model: {compiledModelPath}");
-            
+
             // Disable all buttons during inference
+            DownloadModelButton.IsEnabled = false;
             CompileModelButton.IsEnabled = false;
             LoadModelButton.IsEnabled = false;
             RunButton.IsEnabled = false;
-            DownloadModelButton.IsEnabled = false;
 
             try
             {
@@ -289,6 +289,7 @@ namespace WinMLLabDemo
             finally
             {
                 // Re-enable the button
+                DownloadModelButton.IsEnabled = true;
                 CompileModelButton.IsEnabled = true;
                 LoadModelButton.IsEnabled = true;
                 RunButton.IsEnabled = true;
@@ -304,11 +305,11 @@ namespace WinMLLabDemo
         {
             var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
             var logEntry = $"[{timestamp}] {message}\n";
-            
+
             Dispatcher.Invoke(() =>
             {
                 ConsoleTextBlock.Text += logEntry;
-                
+
                 // Auto-scroll to bottom
                 if (ConsoleTextBlock.Parent is ScrollViewer scrollViewer)
                 {
@@ -357,11 +358,12 @@ namespace WinMLLabDemo
         private async void DownloadModelButton_Click(object sender, RoutedEventArgs e)
         {
             if (selectedExecutionProvider == null)
-            { 
+            {
                 WriteToConsole("Please select an execution provider first.");
                 return;
             }
 
+            DownloadModelButton.IsEnabled = false;
             try
             {
                 // Download model if needed
@@ -379,6 +381,10 @@ namespace WinMLLabDemo
             catch (Exception ex)
             {
                 WriteToConsole($"Error downloading model: {ex.Message}");
+            }
+            finally
+            {
+                DownloadModelButton.IsEnabled = true;
             }
         }
     }
