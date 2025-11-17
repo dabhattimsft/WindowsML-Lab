@@ -154,12 +154,12 @@
             </Grid.ColumnDefinitions>
 
             <!-- Left Section: Execution Providers -->
-            <Border Grid.Column="0" Margin="10,10,14,10" Style="{StaticResource ModernCard}">
+            <Border Grid.Column="0" Margin="10,10,10,10" Style="{StaticResource ModernCard}">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>  <!-- Row 0: Header TextBlock -->
+                        <RowDefinition Height="Auto"/>  <!-- Row 1: Buttons (Refresh + Initialize) -->
+                        <RowDefinition Height="*"/>     <!-- Row 2: DataGrid -->
                     </Grid.RowDefinitions>
 
                     <!-- Header -->
@@ -261,7 +261,7 @@
             </Border>
 
             <!-- Right Section: Image Classification -->
-            <Border Grid.Column="1" Margin="14,10,10,10" Style="{StaticResource ModernCard}">
+            <Border Grid.Column="1" Margin="10,10,10,10" Style="{StaticResource ModernCard}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
