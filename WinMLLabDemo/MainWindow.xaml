@@ -185,7 +185,7 @@
 
                     <!-- DataGrid for Execution Providers -->
                     <DataGrid x:Name="ExecutionProvidersGrid" Grid.Row="2" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" GridLinesVisibility="None" HeadersVisibility="Column"
-                              Background="White" RowBackground="White" AlternatingRowBackground="#FAFAFA" BorderBrush="#E0E0E0" BorderThickness="1" FontSize="13" RowHeight="36">
+                              Background="White" RowBackground="White" AlternatingRowBackground="#FAFAFA" BorderBrush="#E0E0E0" BorderThickness="1" FontSize="13" RowHeight="30">
                         <DataGrid.Resources>
                             <Style TargetType="DataGridRow">
                                 <Setter Property="BorderThickness" Value="0,0,0,1"/>
