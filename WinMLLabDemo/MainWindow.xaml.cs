@@ -115,6 +115,7 @@ namespace WinMLLabDemo
 
             if (_modelFolderPath == null)
             {
+                DownloadModelButton.IsEnabled = true;
                 LoadModelButton.IsEnabled = false;
                 return;
             }
@@ -180,6 +181,7 @@ namespace WinMLLabDemo
                 return;
             }
 
+            DownloadModelButton.IsEnabled = false;
             try
             {
                 // Download model if needed
