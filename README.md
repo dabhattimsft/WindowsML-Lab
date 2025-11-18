@@ -2,7 +2,8 @@
 
 In this lab demo, we're going to be building an image classification app that can take in any image and locally identify what prominent features might be in the image, like the breed of a dog. We'll be using the ONNX Runtime that ships with WinML, along with an ONNX model we have, and using WinML to dynamically download the EPs for the device.
 
-<img width="800" alt="image" src="https://github.com/user-attachments/assets/18c8ff9f-82bb-41c1-8b12-14c3f5a49af3" />
+<img width="800" alt="demo app visual" src="https://github.com/user-attachments/assets/53f5cbbf-4dcc-411c-9eef-b40578586b66" />
+
 
 ## Introduction
 
@@ -67,7 +68,7 @@ Click the Start Debugging button to deploy the app.
 
 The app should look like this when it launches.
 
-<img width="400" alt="image" src="https://github.com/user-attachments/assets/153119fc-1faf-4a61-91b1-7655b34a4963" />
+<img width="400" alt="demo app in after deploying" src="https://github.com/user-attachments/assets/12309f79-e43f-482a-b719-03a829c3dff7" />
 
 Notice that there are some execution providers that already appear. By default, the CPU and DirectML execution providers are present on all devices. You might have the device with NPU and We're going to use WinML to dynamically download the execution provider that works with your NPU, so that you can run the model on your NPU!
 
@@ -113,7 +114,7 @@ With that method implemented, save your changes (`Ctrl+S`) and click the Start D
 
 Click the **Initialize WinML EPs** button, which will call the API we just added! The device you're using has NPU and you should see compatible EP in the list.
 
-<img width="359" height="116" alt="image" src="https://github.com/user-attachments/assets/7c6d7342-d261-4ed0-8683-873e2cf5445c" /> <img width="350" height="200" alt="image" src="https://github.com/user-attachments/assets/9ae972f9-893d-4444-a61e-bb6b0e10482c" />
+<img width="359" alt="EP list after Initialize WinML EPs button" src="https://github.com/user-attachments/assets/f945f037-3004-4d6a-8107-9cc24cd1ee65" />
 
 
 We still need to implement logic to compile, load, and inference the model, which we'll do in the next steps. From here on, we will keep the app open while we edit and see our changes appear live!
@@ -153,9 +154,10 @@ compileOptions.CompileModel();
 
 Save your changes (`Ctrl+S`) and then press the **Hot Reload** button (or `Alt+F10`).
 
-Then, switch back to the app, select the **QNNExecutionProvider**/**OpenVINOExecutionProvider** EP, and click the **Compile Model** button. This will take ~15 seconds, but in the console output you should eventually see that it outputs a compiled model path!
+Then, switch back to the app, select the **OpenVINOExecutionProvider** EP, and click the **Compile Model** button. This will take ~15 seconds, but in the console output you should eventually see that it outputs a compiled model path!
 
-<img width="400" alt="image" src="https://github.com/user-attachments/assets/71c02862-09d6-4891-a55e-0476a1603a15" />
+<img width="400" alt="compile button click" src="https://github.com/user-attachments/assets/4bee8968-6e24-4548-9b5a-1b58825440e1" />
+
 
 The model is now ready to load on the NPU! Note that our app implements caching logic, so that if the model is already compiled on disk, it will use the already-compiled version, so users only have to experience the initial compile once.
 
@@ -178,7 +180,8 @@ public static InferenceSession LoadModel(string compiledModelPath, OrtEpDevice e
 
 Save your changes (`Ctrl+S`), press the **Hot Reload** button (or `Alt+F10`), and switch back to the app, and click the **Load Model** button. You should see console output indicating that the model is loaded!
 
-<img width="400" alt="image" src="https://github.com/user-attachments/assets/9254a1db-78e7-4036-be5c-2f97534a6b4c" />
+<img width="400" alt="load button click" alt="image" src="https://github.com/user-attachments/assets/e64d34a0-5041-41a7-bfb9-2e0cc1321d6c" />
+
 
 ## Step 8: Implement inferencing the model
 
@@ -211,7 +214,8 @@ public static async Task<string> RunModelAsync(InferenceSession session, string 
 
 Save your changes (`Ctrl+S`), press the **Hot Reload** button (or `Alt+F10`), and switch back to the app, and click the **Run Classification** button. You should see results displayed within the Classification Results text field!
 
-<img width="303" height="257" alt="image" src="https://github.com/user-attachments/assets/b536c26d-d9cc-4f3b-91c1-f1dea16d615e" />
+<img width="307" alt="run classification button" src="https://github.com/user-attachments/assets/718f9ed7-4a4f-4e66-bf79-a806673e9249" />
+
 
 You've successfully completed the lab! We used WinML to get EPs specific to our current device, so that our app didn't have to distribute those EPs ourselves. And then we used the shared copy of ONNX Runtime within WinML to compile, load, and inference this model on NPU!
 
