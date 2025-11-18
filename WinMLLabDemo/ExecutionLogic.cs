@@ -38,6 +38,10 @@ namespace WinMLLabDemo
             // TODO-1: Get/Initialize execution providers from the WinML
             // After finishing this step, WinML will find all applicable EPs for your device
             // download the EP for your device, deploy it and register with ONNX Runtime.
+
+            var catalog = ExecutionProviderCatalog.GetDefault();
+
+            await catalog.EnsureAndRegisterCertifiedAsync();
         }
 
         public static string CompileModelForExecutionProvider(OrtEpDevice executionProvider)
@@ -49,8 +53,16 @@ namespace WinMLLabDemo
             {
                 var sessionOptions = GetSessionOptions(executionProvider);
 
-                // TODO-2.2: Create compilation options, set the input and output, and compile.
+                // TODO-2: Create compilation options, set the input and output, and compile.
                 // After finishing this step, a compiled model will be created at 'compiledModelPath'
+
+                var compileOptions = new OrtModelCompilationOptions(sessionOptions);
+
+                compileOptions.SetInputModelPath(baseModelPath);
+                compileOptions.SetOutputModelPath(compiledModelPath);
+
+                // Compile the model
+                compileOptions.CompileModel();
             }
             catch
             {
@@ -65,7 +77,7 @@ namespace WinMLLabDemo
             var sessionOptions = GetSessionOptions(executionProvider);
 
             // TODO-3: Return an inference session
-            throw new NotImplementedException();
+            return new InferenceSession(compiledModelPath, sessionOptions);
         }
 
         public static async Task<string> RunModelAsync(InferenceSession session, string imagePath, string compiledModelPath, OrtEpDevice executionProvider)
@@ -74,7 +86,9 @@ namespace WinMLLabDemo
             var inputs = await ModelHelpers.BindInputs(imagePath, session);
 
             // TODO-4: Run the inference, format and return the results
-            throw new NotImplementedException();
+            using var results = session.Run(inputs);
+
+            return ModelHelpers.FormatResults(results, session);
         }
 
         private static SessionOptions GetSessionOptions(OrtEpDevice executionProvider)
@@ -91,12 +105,12 @@ namespace WinMLLabDemo
                     break;
 
                 case "OpenVINOExecutionProvider":
-                    // TODO-2.1: Configure threading for OpenVINO EP
+                    epOptions["num_of_threads"] = "4";
                     sessionOptions.AppendExecutionProvider(_ortEnv, [executionProvider], epOptions);
                     break;
 
                 case "QNNExecutionProvider":
-                    // TODO-2.1: Configure performance mode for QNN EP
+                    epOptions["htp_performance_mode"] = "high_performance";
                     sessionOptions.AppendExecutionProvider(_ortEnv, [executionProvider], epOptions);
                     break;
 
