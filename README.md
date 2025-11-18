@@ -2,7 +2,7 @@
 
 In this lab demo, we're going to be building an image classification app that can take in any image and locally identify what prominent features might be in the image, like the breed of a dog. We'll be using the ONNX Runtime that ships with WinML, along with an ONNX model we have, and using WinML to dynamically download the EPs for the device.
 
-<img width="800" alt="image" src="https://github.com/user-attachments/assets/18c8ff9f-82bb-41c1-8b12-14c3f5a49af3" />
+<img width="800" alt="demo app visual" src="https://github.com/user-attachments/assets/53f5cbbf-4dcc-411c-9eef-b40578586b66" />
 
 
 ## Introduction
@@ -22,15 +22,22 @@ ONNX Runtime, or ORT, is an open‑source engine for running ONNX models. It loa
 ### Execution Provider (EP)
 Execution providers (EPs) are specialized implementations that execute ONNX operations on specific hardware. They act as the interface between ONNX Runtime and hardware-specific libraries to leverage hardware acceleration capabilities. IOW EPs are plug-ins that tell ONNX Runtime where and how to run your model.
 
+### Flow of the lab
+As part of this lab, we will be doing 4 things,
+- Ensure and register Execution Providers with ONNX runtime with help of WindowsML APIs 
+- Compile the SqueezeNet Model
+- Load that compiled model
+- And finally, Run the inference 
+
 ### Model compilation
-Compilation applies graph-level optimizations (e.g. fusion, constant folding, memory layout changes etc.) and hardware-specific tuning.
+For these hardware-specific EPs, models need to be compiled against the EP before you can use the model. Compilation applies graph-level optimizations (e.g. operator fusion, constant folding, memory layout changes etc.) and hardware-specific tuning.
 E.g. for QNN EP - Compilation step maps ONNX ops → QNN ops. IOW it compiles the ONNX graph into a QNN graph.
 
 ### Model loading
 Some of the steps which are part of model loading,
 - Read .onnx file from disk or memory
-- Parse protobuf into internal model structure
-- Validate opset, schema, and available operators
+- deserialization into in-memory data structures
+- Validate opset, schema, and available operators etc.
 
 ### WindowsML (WinML)
 Windows Machine Learning (ML) enables C#, C++, and Python developers to run ONNX AI models locally on Windows PCs via the ONNX Runtime, with automatic execution provider management for different hardware (CPUs, GPUs, NPUs). ONNX Runtime can be used with models from PyTorch, Tensorflow/Keras, TFLite, scikit-learn, and other frameworks. Windows ML provides a shared Windows-wide copy of the ONNX Runtime, plus the ability to dynamically download execution providers (EPs).
@@ -55,26 +62,36 @@ In Visual Studio, open the *Solution Explorer* and inspect the dependencies of t
 
 ## Step 3: Deploy the app
 
-Click the Start Debugging button to deploy the app. We'll keep it open while we edit, and see changes appear live!
+Click the Start Debugging button to deploy the app.
 
 <img width="269" height="39" alt="image" src="https://github.com/user-attachments/assets/56aeb74f-8efc-420b-9753-3f4a83a041f9" />
 
 The app should look like this when it launches.
 
-<img width="400" alt="image" src="https://github.com/user-attachments/assets/153119fc-1faf-4a61-91b1-7655b34a4963" />
+<img width="400" alt="demo app in after deploying" src="https://github.com/user-attachments/assets/12309f79-e43f-482a-b719-03a829c3dff7" />
 
 Notice that there are some execution providers that already appear. By default, the CPU and DirectML execution providers are present on all devices. You might have the device with NPU and We're going to use WinML to dynamically download the execution provider that works with your NPU, so that you can run the model on your NPU!
 
 
 ## Step 4: Open the ExecutionLogic.cs file
 
-Further down in the *Solution Explorer*, find and open the **ExecutionLogic.cs** file. Notice that we have a static `OrtEnv` initialized and we have default ONNX code for getting the currently available EPs, but there are a variety of `// TODO`'s for WinML-specific logic we'll implement.
+Switch back to Visual Studio, click on “Stop Debugging”. 
+
+<img width="250" alt="image" src="https://github.com/user-attachments/assets/b1980e41-3933-48f9-8bd1-e155312a70f7" />
+
+In the *Solution Explorer*, find and open the **ExecutionLogic.cs** file. Notice that we have a static `OrtEnv` initialized and we have default ONNX code for getting the currently available EPs, but there are a variety of `// TODO`'s for WinML-specific logic we'll implement.
 
 <img width="400" alt="image" src="https://github.com/user-attachments/assets/4fd023ae-9418-40cb-81c3-e5ab7346a0fc" />
 
 ## Step 5: Implement getting new EPs
 
-First, we have to use WinML to see if there are any new EPs, and download them if there are. Update `InitializeWinMLEPsAsync` to call `await catalog.EnsureAndRegisterCertifiedAsync()`.
+In this step we will call WindowsML API which acquires, deploys and registers certified EPs. For this lab, your machines already have these EPs downloaded. So, calling these API will make sure that they are present and will register them with ONNX Runtime. 
+
+These EPs are delivered via Windows Update and You can see them in Update history in Settings app.
+
+<img width="300" alt="image" src="https://github.com/user-attachments/assets/1e2b3f19-6b6c-4b57-977c-2e1e4d1e41e5" />
+
+In ExecutionLogic.cs, update `InitializeWinMLEPsAsync()` method to call `await catalog.EnsureAndRegisterCertifiedAsync()`.
 
 ```csharp
 public static async Task InitializeWinMLEPsAsync()
@@ -92,18 +109,15 @@ public static async Task InitializeWinMLEPsAsync()
 }
 ```
 
-With that method implemented, save your changes (`Ctrl+S`) and then press the **Hot Reload** button (or `Alt+F10`).
+With that method implemented, save your changes (`Ctrl+S`) and click the Start Debugging button to deploy the app.
+<img width="269" height="39" alt="image" src="https://github.com/user-attachments/assets/56aeb74f-8efc-420b-9753-3f4a83a041f9" />
 
-<img width="135" height="49" alt="image" src="https://github.com/user-attachments/assets/ff0bb80e-f133-4a23-b899-672e69588351" />
+Click the **Initialize WinML EPs** button, which will call the API we just added! The device you're using has NPU and you should see compatible EP in the list.
 
-> If you get a hot reload error about "Value cannot be null. (Parameter 'key')", click "Edit" then try adding the first line by itself and hot reloading, and then adding the second line (or stop debugging and re-deploy).
-
-Then, switch back to the app and click the **Initialize WinML EPs** button, which will call the API we just added! The device you're using has NPU and you should see compatible EP in the list.
-
-<img width="359" height="116" alt="image" src="https://github.com/user-attachments/assets/7c6d7342-d261-4ed0-8683-873e2cf5445c" /> <img width="350" height="200" alt="image" src="https://github.com/user-attachments/assets/9ae972f9-893d-4444-a61e-bb6b0e10482c" />
+<img width="359" alt="EP list after Initialize WinML EPs button" src="https://github.com/user-attachments/assets/f945f037-3004-4d6a-8107-9cc24cd1ee65" />
 
 
-We still need to implement logic to compile, load, and inference the model, which we'll do in the next steps.
+We still need to implement logic to compile, load, and inference the model, which we'll do in the next steps. From here on, we will keep the app open while we edit and see our changes appear live!
 
 ## Step 6: Implement compiling the model
 
@@ -140,9 +154,10 @@ compileOptions.CompileModel();
 
 Save your changes (`Ctrl+S`) and then press the **Hot Reload** button (or `Alt+F10`).
 
-Then, switch back to the app, select the **QNNExecutionProvider**/**OpenVINOExecutionProvider** EP, and click the **Compile Model** button. This will take ~15 seconds, but in the console output you should eventually see that it outputs a compiled model path!
+Then, switch back to the app, select the **OpenVINOExecutionProvider** EP, and click the **Compile Model** button. This will take ~15 seconds, but in the console output you should eventually see that it outputs a compiled model path!
 
-<img width="400" alt="image" src="https://github.com/user-attachments/assets/71c02862-09d6-4891-a55e-0476a1603a15" />
+<img width="400" alt="compile button click" src="https://github.com/user-attachments/assets/4bee8968-6e24-4548-9b5a-1b58825440e1" />
+
 
 The model is now ready to load on the NPU! Note that our app implements caching logic, so that if the model is already compiled on disk, it will use the already-compiled version, so users only have to experience the initial compile once.
 
@@ -165,7 +180,8 @@ public static InferenceSession LoadModel(string compiledModelPath, OrtEpDevice e
 
 Save your changes (`Ctrl+S`), press the **Hot Reload** button (or `Alt+F10`), and switch back to the app, and click the **Load Model** button. You should see console output indicating that the model is loaded!
 
-<img width="400" alt="image" src="https://github.com/user-attachments/assets/9254a1db-78e7-4036-be5c-2f97534a6b4c" />
+<img width="400" alt="load button click" alt="image" src="https://github.com/user-attachments/assets/e64d34a0-5041-41a7-bfb9-2e0cc1321d6c" />
+
 
 ## Step 8: Implement inferencing the model
 
@@ -198,7 +214,8 @@ public static async Task<string> RunModelAsync(InferenceSession session, string 
 
 Save your changes (`Ctrl+S`), press the **Hot Reload** button (or `Alt+F10`), and switch back to the app, and click the **Run Classification** button. You should see results displayed within the Classification Results text field!
 
-<img width="303" height="257" alt="image" src="https://github.com/user-attachments/assets/b536c26d-d9cc-4f3b-91c1-f1dea16d615e" />
+<img width="307" alt="run classification button" src="https://github.com/user-attachments/assets/718f9ed7-4a4f-4e66-bf79-a806673e9249" />
+
 
 You've successfully completed the lab! We used WinML to get EPs specific to our current device, so that our app didn't have to distribute those EPs ourselves. And then we used the shared copy of ONNX Runtime within WinML to compile, load, and inference this model on NPU!
 
@@ -210,11 +227,12 @@ Also, feel free to experiment with using the built-in EPs. Click the **CPUExecut
 
 ## Step 10: Play with other models and APIs
 There are few more branches on the repo for you to play with WinML.
-- [phi_chat](https://github.com/dabhattimsft/WindowsML-Lab/tree/phi_chat) branch is a fork of the demo app. This app utilizes [phi-3 model](https://azure.microsoft.com/en-us/blog/introducing-phi-3-redefining-whats-possible-with-slms/?msockid=0012df25b14061c52557cc8eb5406fa2) to create a local chat bot.
+- [extra/phi_chat](https://github.com/dabhattimsft/WindowsML-Lab/tree/extra/phi_chat) branch is a fork of the demo app. This app utilizes [phi-3 model](https://azure.microsoft.com/en-us/blog/introducing-phi-3-redefining-whats-possible-with-slms/?msockid=0012df25b14061c52557cc8eb5406fa2) to create a local chat bot.
   - This is complete app and doesn't have any TODOs. All the relevant logic is in ExecutionLogic.cs and look for **// WindowsML-Lab-phi** comments for more details.
 This branch also uses ModelCatalog APIs of WindowsML to download models dynamically. You can [learn more about ModelCatalog APIs here](https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/model-catalog/overview).
-- [final_resnet50](https://github.com/dabhattimsft/WindowsML-Lab/tree/final_resnet50) branch uses ResNet-50 model instead of Squeezenet model.
-- [squeezenet_with_model_catalog](https://github.com/dabhattimsft/WindowsML-Lab/tree/squeezenet_with_model_catalog) uses ModelCatalog APIs of WindowsML to download models dynamically.
+- [extra/final_resnet50](https://github.com/dabhattimsft/WindowsML-Lab/tree/extra/final_resnet50) branch uses ResNet-50 model instead of Squeezenet model.
+- [extra/squeezenet_with_model_catalog](https://github.com/dabhattimsft/WindowsML-Lab/tree/extra/squeezenet_with_model_catalog) uses ModelCatalog APIs of WindowsML to download models dynamically.
+
 
 # References
 [Windows ML Overview](https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview)
