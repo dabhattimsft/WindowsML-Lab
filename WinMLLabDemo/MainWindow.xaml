@@ -342,7 +342,7 @@
                         <TextBox x:Name="MessageInput"
                                  Grid.Column="0"
                                  KeyDown="MessageInput_KeyDown"
-                                 Height="30"
+                                 Height="32"
                                  TextWrapping="Wrap"
                                  VerticalAlignment="Center"
                                  VerticalContentAlignment="Center"
