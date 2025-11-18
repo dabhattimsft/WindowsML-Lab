@@ -50,11 +50,11 @@ namespace WinMLLabDemo
 
             ExecutionProviders = new ObservableCollection<OrtEpDevice>();
             ExecutionProvidersGrid.ItemsSource = ExecutionProviders;
-            
+
             // Initialize Messages collection and bind to ChatMessages ItemsControl
             Messages = new ObservableCollection<ChatMessage>();
             ChatMessages.ItemsSource = Messages;
-            
+
             // Set up EP selection event
             ExecutionProvidersGrid.SelectionChanged += ExecutionProvidersGrid_SelectionChanged;
 
@@ -92,7 +92,15 @@ namespace WinMLLabDemo
             _generator = null;
             _tokenizer = null;
             SendButton.IsEnabled = false;
-            LoadModelButton.Content = "Load Model";
+
+            // Reset Load Model button text
+            if (LoadModelButton.Content is StackPanel stackPanel && stackPanel.Children.Count > 1)
+            {
+                if (stackPanel.Children[1] is TextBlock textBlock)
+                {
+                    textBlock.Text = "Load Model";
+                }
+            }
 
             // Update button states
             UpdateButtonStates();
@@ -114,7 +122,15 @@ namespace WinMLLabDemo
             {
                 // Model already downloaded
                 DownloadModelButton.IsEnabled = false;
-                DownloadModelButton.Content = "Model Downloaded";
+
+                // Update only the text, not the entire content
+                if (DownloadModelButton.Content is StackPanel stackPanel && stackPanel.Children.Count > 1)
+                {
+                    if (stackPanel.Children[1] is TextBlock textBlock)
+                    {
+                        textBlock.Text = "Model Downloaded";
+                    }
+                }
             }
 
             LoadModelButton.IsEnabled = Directory.Exists(_modelFolderPath);
@@ -212,7 +228,13 @@ namespace WinMLLabDemo
 
                 // Update Load model button
                 LoadModelButton.IsEnabled = false;
-                LoadModelButton.Content = "Model loaded";
+                if (LoadModelButton.Content is StackPanel stackPanel && stackPanel.Children.Count > 1)
+                {
+                    if (stackPanel.Children[1] is TextBlock textBlock)
+                    {
+                        textBlock.Text = "Model Loaded";
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -248,8 +270,8 @@ namespace WinMLLabDemo
                 await Task.Run(async () =>
                 {
                     string response = await ExecutionLogic.GenerateModelResponseAsync(
-                        _tokenizer, 
-                        _generator, 
+                        _tokenizer,
+                        _generator,
                         userPrompt,
                         token =>
                         {
@@ -278,7 +300,7 @@ namespace WinMLLabDemo
             {
                 // Prevent the Enter key from creating a new line
                 e.Handled = true;
-                
+
                 // Call the same method that the Send button uses
                 SendButton_Click(sender, e);
             }
@@ -293,11 +315,11 @@ namespace WinMLLabDemo
         {
             var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
             var logEntry = $"[{timestamp}] {message}\n";
-            
+
             Dispatcher.Invoke(() =>
             {
                 ConsoleTextBlock.Text += logEntry;
-                
+
                 // Auto-scroll to bottom
                 if (ConsoleTextBlock.Parent is ScrollViewer scrollViewer)
                 {
