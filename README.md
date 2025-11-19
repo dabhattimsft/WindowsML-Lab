@@ -12,9 +12,11 @@ To run this app,
   - Console will show log "Model loaded successfully" and once model is loaded "Send" button will be enabled.
 - Type prompt in the text box and click "Send"
 
-https://github.com/user-attachments/assets/b964d855-9e29-4ae6-9cf9-79524b5f2745
 
-https://github.com/user-attachments/assets/21308267-597d-42f5-989e-25a697202c28
+https://github.com/user-attachments/assets/61c9b6f5-f132-4f3b-904a-67ae8574e98f
+
+https://github.com/user-attachments/assets/1fdc7db2-111a-4980-b6ff-b378618f5d78
+
 
 ### Download Model
 ```csharp
